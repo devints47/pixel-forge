@@ -1,6 +1,16 @@
 # Pixel Forge 🎨
 
-> The complete image generation toolkit for modern web development
+<div align="center">
+  <img width="180" height="180" alt="Pixel Forge Logo" src="https://github.com/user-attachments/assets/eefff801-e525-4d7f-8d22-dbcb748059fa" />
+  
+  **The complete image generation toolkit for modern web development**
+  
+  *Stop wrestling with image sizes. Start focusing on your content.*
+
+  [![npm version](https://badge.fury.io/js/pixel-forge.svg)](https://badge.fury.io/js/pixel-forge)
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
+</div>
 
 Pixel Forge is a reliable TypeScript package that generates optimized images for social media previews, favicons, SEO metadata, and PWA assets across **all major platforms** - from Facebook and Instagram to TikTok, WhatsApp, Discord, to iMessage, SMS, RCS, and more.
 
