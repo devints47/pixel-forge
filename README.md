@@ -1,8 +1,8 @@
 # Pixel Forge 🎨
 
 <div align="center">
-  <img width="180" height="180" alt="Pixel Forge Logo" src="https://github.com/user-attachments/assets/eefff801-e525-4d7f-8d22-dbcb748059fa" />
-  
+  <img width="225" height="225" alt="Pixel Forge Logo Transparent" src="https://github.com/user-attachments/assets/19e54310-ce12-4dd1-9db5-46c11319e8a9" />
+
   **The complete image generation toolkit for modern web development**
   
   *Stop wrestling with image sizes. Start focusing on your content.*
