@@ -5,6 +5,7 @@ on:
     branches: [ main, develop ]
   push:
     branches: [ main, develop ]
+    tags: [ 'v*' ]
 
 jobs:
   # Matrix testing across Node.js versions
@@ -169,7 +170,81 @@ jobs:
         cache: 'pnpm'
 
     - name: Install dependencies
-      run: pnpm install --frozen-lockfile
+      run: pnpm install --no-frozen-lockfile
+  # Publish on version tags (v*)
+  publish:
+    name: Publish Packages
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install ImageMagick
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y imagemagick jq
+        convert --version
+
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 9
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'pnpm'
+
+    - name: Install dependencies
+      run: pnpm install --no-frozen-lockfile
+
+    - name: Run tests
+      run: pnpm test
+
+    - name: Run lint
+      run: pnpm run lint
+
+    - name: Build project
+      run: pnpm run build
+
+    - name: Configure npm for npmjs.org
+      run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+      env:
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+    - name: Publish to npm
+      run: npm publish --access public
+      env:
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+    - name: Backup package.json
+      run: cp package.json package.json.backup
+
+    - name: Rewrite package.json for GitHub Packages
+      run: |
+        jq '.name = "@devints47/pixel-forge" | .bin = {"pixel-forge":"dist/cli/index.js","pforge":"dist/cli/index.js"}' package.json > package.json.tmp
+        mv package.json.tmp package.json
+
+    - name: Configure npm for GitHub Packages
+      run: |
+        echo "@devints47:registry=https://npm.pkg.github.com" > ~/.npmrc
+        echo "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}" >> ~/.npmrc
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Publish to GitHub Packages
+      run: npm publish --access public --registry=https://npm.pkg.github.com
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Restore package.json
+      run: mv package.json.backup package.json
 
     - name: Run high-level security audit
       run: pnpm audit --audit-level=high

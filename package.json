@@ -22,6 +22,7 @@
     "prepare": "pnpm run build",
     "prepack": "pnpm run build",
     "prepublishOnly": "pnpm run lint && pnpm test",
+    "release:tag": "git tag v$npm_package_version && git push origin v$npm_package_version",
     "clean": "rimraf dist"
   },
   "keywords": [

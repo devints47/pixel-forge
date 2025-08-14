@@ -11,6 +11,9 @@ on:
         description: 'Publish to GitHub Packages?'
         required: false
         default: 'true'
+  push:
+    tags:
+      - 'v*'
 
 jobs:
   build-and-publish:
@@ -45,24 +48,24 @@ jobs:
 
       # ---------- NPMJS.ORG PUBLISH ----------
       - name: Prepare .npmrc for npmjs.org
-        if: ${{ github.event.inputs.publish_to_npm == 'true' }}
+        if: ${{ github.event_name == 'push' || github.event.inputs.publish_to_npm == 'true' }}
         run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish to npm
-        if: ${{ github.event.inputs.publish_to_npm == 'true' }}
+        if: ${{ github.event_name == 'push' || github.event.inputs.publish_to_npm == 'true' }}
         run: npm publish --access public
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       # ---------- GITHUB PACKAGES PUBLISH ----------
       - name: Backup package.json for GitHub Packages
-        if: ${{ github.event.inputs.publish_to_github == 'true' }}
+        if: ${{ github.event_name == 'push' || github.event.inputs.publish_to_github == 'true' }}
         run: cp package.json package.json.backup
 
       - name: Rewrite package.json for GitHub Packages
-        if: ${{ github.event.inputs.publish_to_github == 'true' }}
+        if: ${{ github.event_name == 'push' || github.event.inputs.publish_to_github == 'true' }}
         run: |
           jq '.name = "@devints47/pixel-forge" | .bin = {
             "pixel-forge": "dist/src/cli/index.js",
@@ -71,7 +74,7 @@ jobs:
           mv package.json.tmp package.json
 
       - name: Prepare .npmrc for GitHub Packages
-        if: ${{ github.event.inputs.publish_to_github == 'true' }}
+        if: ${{ github.event_name == 'push' || github.event.inputs.publish_to_github == 'true' }}
         run: |
           echo "@devints47:registry=https://npm.pkg.github.com" > ~/.npmrc
           echo "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}" >> ~/.npmrc
@@ -79,12 +82,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish to GitHub Packages
-        if: ${{ github.event.inputs.publish_to_github == 'true' }}
+        if: ${{ github.event_name == 'push' || github.event.inputs.publish_to_github == 'true' }}
         run: npm publish --access public --registry=https://npm.pkg.github.com
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Restore package.json
-        if: ${{ github.event.inputs.publish_to_github == 'true' }}
+        if: ${{ github.event_name == 'push' || github.event.inputs.publish_to_github == 'true' }}
         run: mv package.json.backup package.json
 
