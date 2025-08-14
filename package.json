@@ -1,6 +1,6 @@
 {
   "name": "pixel-forge",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "A comprehensive generator for social media previews, favicons, and visual assets across all platforms",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
