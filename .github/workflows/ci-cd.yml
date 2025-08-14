@@ -175,6 +175,9 @@ jobs:
     name: Publish Packages
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: read
+      packages: write
     env:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -227,7 +230,7 @@ jobs:
 
     - name: Rewrite package.json for GitHub Packages
       run: |
-        jq '.name = "@devints47/pixel-forge" | .bin = {"pixel-forge":"dist/cli/index.js","pforge":"dist/cli/index.js"}' package.json > package.json.tmp
+        jq '.name = "@devints47/pixel-forge" | .repository = {"type":"git","url":"git+https://github.com/devints47/pixel-forge.git"} | .publishConfig = {"registry":"https://npm.pkg.github.com"} | .bin = {"pixel-forge":"dist/cli/index.js","pforge":"dist/cli/index.js"}' package.json > package.json.tmp
         mv package.json.tmp package.json
 
     - name: Configure npm for GitHub Packages
