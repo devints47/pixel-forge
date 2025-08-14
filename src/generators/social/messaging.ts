@@ -88,7 +88,7 @@ export class MessagingGenerator {
     const outputPath = path.join(this.config.output.path, 'messaging-standard.png');
 
     const processor = new ImageProcessor(this.sourceImage);
-    processor.createSocialPreview({
+    const socialFile = await processor.createSocialPreview({
       width,
       height,
       title: options.title || this.config.appName,
@@ -97,10 +97,12 @@ export class MessagingGenerator {
       background: this.config.backgroundColor
     });
 
-    await processor.save(outputPath, {
+    const finalProcessor = new ImageProcessor(socialFile);
+    await finalProcessor.save(outputPath, {
       format: 'png',
       quality: this.config.output.quality
     });
+    await processor.cleanup();
   }
 
   /**
@@ -112,7 +114,7 @@ export class MessagingGenerator {
     const squareOutputPath = path.join(this.config.output.path, 'whatsapp-square.png');
 
     const squareProcessor = new ImageProcessor(this.sourceImage);
-    squareProcessor.createSocialPreview({
+    const squareFile = await squareProcessor.createSocialPreview({
       width: squareWidth,
       height: squareHeight,
       title: options.title || this.config.appName,
@@ -121,17 +123,19 @@ export class MessagingGenerator {
       background: this.config.backgroundColor
     });
 
-    await squareProcessor.save(squareOutputPath, {
+    const squareFinal = new ImageProcessor(squareFile);
+    await squareFinal.save(squareOutputPath, {
       format: 'png',
       quality: this.config.output.quality
     });
+    await squareProcessor.cleanup();
 
     // Link preview format
     const { width: linkWidth, height: linkHeight } = ImageSizes.messaging.whatsappLink;
     const linkOutputPath = path.join(this.config.output.path, 'whatsapp-link.png');
 
     const linkProcessor = new ImageProcessor(this.sourceImage);
-    linkProcessor.createSocialPreview({
+    const linkFile = await linkProcessor.createSocialPreview({
       width: linkWidth,
       height: linkHeight,
       title: options.title || this.config.appName,
@@ -140,10 +144,12 @@ export class MessagingGenerator {
       background: this.config.backgroundColor
     });
 
-    await linkProcessor.save(linkOutputPath, {
+    const linkFinal = new ImageProcessor(linkFile);
+    await linkFinal.save(linkOutputPath, {
       format: 'png',
       quality: this.config.output.quality
     });
+    await linkProcessor.cleanup();
   }
 
   /**
@@ -154,7 +160,7 @@ export class MessagingGenerator {
     const outputPath = path.join(this.config.output.path, 'wechat.png');
 
     const processor = new ImageProcessor(this.sourceImage);
-    processor.createSocialPreview({
+    const socialFile = await processor.createSocialPreview({
       width,
       height,
       title: options.title || this.config.appName,
@@ -163,10 +169,12 @@ export class MessagingGenerator {
       background: this.config.backgroundColor
     });
 
-    await processor.save(outputPath, {
+    const finalProcessor = new ImageProcessor(socialFile);
+    await finalProcessor.save(outputPath, {
       format: 'png',
       quality: this.config.output.quality
     });
+    await processor.cleanup();
   }
 
   /**
@@ -177,7 +185,7 @@ export class MessagingGenerator {
     const outputPath = path.join(this.config.output.path, 'discord.png');
 
     const processor = new ImageProcessor(this.sourceImage);
-    processor.createSocialPreview({
+    const socialFile = await processor.createSocialPreview({
       width,
       height,
       title: options.title || this.config.appName,
@@ -186,10 +194,12 @@ export class MessagingGenerator {
       background: this.config.backgroundColor
     });
 
-    await processor.save(outputPath, {
+    const finalProcessor = new ImageProcessor(socialFile);
+    await finalProcessor.save(outputPath, {
       format: 'png',
       quality: this.config.output.quality
     });
+    await processor.cleanup();
   }
 
   /**
@@ -200,7 +210,7 @@ export class MessagingGenerator {
     const outputPath = path.join(this.config.output.path, 'telegram.png');
 
     const processor = new ImageProcessor(this.sourceImage);
-    processor.createSocialPreview({
+    const socialFile = await processor.createSocialPreview({
       width,
       height,
       title: options.title || this.config.appName,
@@ -209,10 +219,12 @@ export class MessagingGenerator {
       background: this.config.backgroundColor
     });
 
-    await processor.save(outputPath, {
+    const finalProcessor = new ImageProcessor(socialFile);
+    await finalProcessor.save(outputPath, {
       format: 'png',
       quality: this.config.output.quality
     });
+    await processor.cleanup();
   }
 
   /**
@@ -223,7 +235,7 @@ export class MessagingGenerator {
     const outputPath = path.join(this.config.output.path, 'signal.png');
 
     const processor = new ImageProcessor(this.sourceImage);
-    processor.createSocialPreview({
+    const socialFile = await processor.createSocialPreview({
       width,
       height,
       title: options.title || this.config.appName,
@@ -232,10 +244,12 @@ export class MessagingGenerator {
       background: this.config.backgroundColor
     });
 
-    await processor.save(outputPath, {
+    const finalProcessor = new ImageProcessor(socialFile);
+    await finalProcessor.save(outputPath, {
       format: 'png',
       quality: this.config.output.quality
     });
+    await processor.cleanup();
   }
 
   /**
@@ -246,7 +260,7 @@ export class MessagingGenerator {
     const outputPath = path.join(this.config.output.path, 'slack.png');
 
     const processor = new ImageProcessor(this.sourceImage);
-    processor.createSocialPreview({
+    const socialFile = await processor.createSocialPreview({
       width,
       height,
       title: options.title || this.config.appName,
@@ -255,10 +269,12 @@ export class MessagingGenerator {
       background: this.config.backgroundColor
     });
 
-    await processor.save(outputPath, {
+    const finalProcessor = new ImageProcessor(socialFile);
+    await finalProcessor.save(outputPath, {
       format: 'png',
       quality: this.config.output.quality
     });
+    await processor.cleanup();
   }
 
   /**
@@ -269,7 +285,7 @@ export class MessagingGenerator {
     const outputPath = path.join(this.config.output.path, 'imessage.png');
 
     const processor = new ImageProcessor(this.sourceImage);
-    processor.createSocialPreview({
+    const socialFile = await processor.createSocialPreview({
       width,
       height,
       title: options.title || this.config.appName,
@@ -278,10 +294,12 @@ export class MessagingGenerator {
       background: this.config.backgroundColor
     });
 
-    await processor.save(outputPath, {
+    const finalProcessor = new ImageProcessor(socialFile);
+    await finalProcessor.save(outputPath, {
       format: 'png',
       quality: this.config.output.quality
     });
+    await processor.cleanup();
   }
 
   /**

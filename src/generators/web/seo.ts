@@ -66,7 +66,7 @@ export class WebSEOGenerator {
     const processor = new ImageProcessor(this.sourceImage);
     
     // Create social preview with template
-    processor.createSocialPreview({
+    const socialFile = await processor.createSocialPreview({
       width,
       height,
       title,
@@ -78,13 +78,16 @@ export class WebSEOGenerator {
     // Save in requested format(s)
     if (outputFormat === 'png' || outputFormat === 'both') {
       const outputPath = path.join(this.config.output.path, 'og-image.png');
-      await processor.save(outputPath, { format: 'png', quality: this.config.output.quality });
+      const final1 = new ImageProcessor(socialFile);
+      await final1.save(outputPath, { format: 'png', quality: this.config.output.quality });
     }
 
     if (outputFormat === 'jpeg' || outputFormat === 'both') {
       const outputPath = path.join(this.config.output.path, 'og-image.jpg');
-      await processor.save(outputPath, { format: 'jpeg', quality: this.config.output.quality });
+      const final2 = new ImageProcessor(socialFile);
+      await final2.save(outputPath, { format: 'jpeg', quality: this.config.output.quality });
     }
+    await processor.cleanup();
   }
 
   /**
@@ -101,7 +104,7 @@ export class WebSEOGenerator {
 
     const processor = new ImageProcessor(this.sourceImage);
     
-    processor.createSocialPreview({
+    const socialFile = await processor.createSocialPreview({
       width,
       height,
       title,
@@ -113,13 +116,16 @@ export class WebSEOGenerator {
     // Save in requested format(s)
     if (outputFormat === 'png' || outputFormat === 'both') {
       const outputPath = path.join(this.config.output.path, 'opengraph.png');
-      await processor.save(outputPath, { format: 'png', quality: this.config.output.quality });
+      const final1 = new ImageProcessor(socialFile);
+      await final1.save(outputPath, { format: 'png', quality: this.config.output.quality });
     }
 
     if (outputFormat === 'jpeg' || outputFormat === 'both') {
       const outputPath = path.join(this.config.output.path, 'opengraph.jpg');
-      await processor.save(outputPath, { format: 'jpeg', quality: this.config.output.quality });
+      const final2 = new ImageProcessor(socialFile);
+      await final2.save(outputPath, { format: 'jpeg', quality: this.config.output.quality });
     }
+    await processor.cleanup();
   }
 
   /**
@@ -136,7 +142,7 @@ export class WebSEOGenerator {
 
     const processor = new ImageProcessor(this.sourceImage);
     
-    processor.createSocialPreview({
+    const socialFile = await processor.createSocialPreview({
       width,
       height,
       title,
@@ -148,13 +154,16 @@ export class WebSEOGenerator {
     // Save in requested format(s)
     if (outputFormat === 'png' || outputFormat === 'both') {
       const outputPath = path.join(this.config.output.path, 'twitter-image.png');
-      await processor.save(outputPath, { format: 'png', quality: this.config.output.quality });
+      const final1 = new ImageProcessor(socialFile);
+      await final1.save(outputPath, { format: 'png', quality: this.config.output.quality });
     }
 
     if (outputFormat === 'jpeg' || outputFormat === 'both') {
       const outputPath = path.join(this.config.output.path, 'twitter-image.jpg');
-      await processor.save(outputPath, { format: 'jpeg', quality: this.config.output.quality });
+      const final2 = new ImageProcessor(socialFile);
+      await final2.save(outputPath, { format: 'jpeg', quality: this.config.output.quality });
     }
+    await processor.cleanup();
   }
 
   /**

@@ -12,6 +12,13 @@ coverage/
 test-assets/
 test-project/
 public/images/
+# Ignore test fixture outputs and temp images
+src/generators/social/__tests__/fixtures/*.png
+src/generators/social/__tests__/fixtures/*.svg
+src/generators/social/__tests__/fixtures/temp-*.png
+src/generators/social/__tests__/fixtures/temp-*.svg
+# Ignore test output directory used in tests
+/test-output/
 
 # Debug
 npm-debug.log*
