@@ -12,6 +12,8 @@ coverage/
 test-assets/
 test-project/
 public/images/
+# Ignore local tarballs created by `pnpm pack`
+pixel-forge-*.tgz
 # Ignore test fixture outputs and temp images
 src/generators/social/__tests__/fixtures/*.png
 src/generators/social/__tests__/fixtures/*.svg
