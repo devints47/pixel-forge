@@ -82,7 +82,7 @@ export class PlatformGenerator {
     const outputPath = path.join(this.config.output.path, 'tiktok.png');
 
     const processor = new ImageProcessor(this.sourceImage);
-    processor.createSocialPreview({
+    const socialFile = await processor.createSocialPreview({
       width,
       height,
       title: options.title || this.config.appName,
@@ -90,11 +90,12 @@ export class PlatformGenerator {
       template: options.template || 'gradient',
       background: this.config.backgroundColor
     });
-
-    await processor.save(outputPath, {
+    const finalProcessor = new ImageProcessor(socialFile);
+    await finalProcessor.save(outputPath, {
       format: 'png',
       quality: this.config.output.quality
     });
+    await processor.cleanup();
   }
 
   /**
@@ -105,7 +106,7 @@ export class PlatformGenerator {
     const outputPath = path.join(this.config.output.path, 'youtube-thumbnail.png');
 
     const processor = new ImageProcessor(this.sourceImage);
-    processor.createSocialPreview({
+    const socialFile = await processor.createSocialPreview({
       width,
       height,
       title: options.title || this.config.appName,
@@ -113,11 +114,12 @@ export class PlatformGenerator {
       template: options.template,
       background: this.config.backgroundColor
     });
-
-    await processor.save(outputPath, {
+    const finalProcessor = new ImageProcessor(socialFile);
+    await finalProcessor.save(outputPath, {
       format: 'png',
       quality: this.config.output.quality
     });
+    await processor.cleanup();
   }
 
   /**
@@ -128,7 +130,7 @@ export class PlatformGenerator {
     const outputPath = path.join(this.config.output.path, 'youtube-shorts.png');
 
     const processor = new ImageProcessor(this.sourceImage);
-    processor.createSocialPreview({
+    const socialFile = await processor.createSocialPreview({
       width,
       height,
       title: options.title || this.config.appName,
@@ -136,11 +138,12 @@ export class PlatformGenerator {
       template: options.template || 'gradient',
       background: this.config.backgroundColor
     });
-
-    await processor.save(outputPath, {
+    const finalProcessor = new ImageProcessor(socialFile);
+    await finalProcessor.save(outputPath, {
       format: 'png',
       quality: this.config.output.quality
     });
+    await processor.cleanup();
   }
 
   /**
@@ -174,7 +177,7 @@ export class PlatformGenerator {
     const outputPath = path.join(this.config.output.path, 'pinterest-square.png');
 
     const processor = new ImageProcessor(this.sourceImage);
-    processor.createSocialPreview({
+    const socialFile = await processor.createSocialPreview({
       width,
       height,
       title: options.title || this.config.appName,
@@ -182,11 +185,12 @@ export class PlatformGenerator {
       template: options.template,
       background: this.config.backgroundColor
     });
-
-    await processor.save(outputPath, {
+    const finalProcessor = new ImageProcessor(socialFile);
+    await finalProcessor.save(outputPath, {
       format: 'png',
       quality: this.config.output.quality
     });
+    await processor.cleanup();
   }
 
   /**
@@ -220,7 +224,7 @@ export class PlatformGenerator {
     const outputPath = path.join(this.config.output.path, 'threads.png');
 
     const processor = new ImageProcessor(this.sourceImage);
-    processor.createSocialPreview({
+    const socialFile = await processor.createSocialPreview({
       width,
       height,
       title: options.title || this.config.appName,
@@ -228,11 +232,12 @@ export class PlatformGenerator {
       template: options.template,
       background: this.config.backgroundColor
     });
-
-    await processor.save(outputPath, {
+    const finalProcessor = new ImageProcessor(socialFile);
+    await finalProcessor.save(outputPath, {
       format: 'png',
       quality: this.config.output.quality
     });
+    await processor.cleanup();
   }
 
   /**
@@ -243,7 +248,7 @@ export class PlatformGenerator {
     const outputPath = path.join(this.config.output.path, 'bluesky.png');
 
     const processor = new ImageProcessor(this.sourceImage);
-    processor.createSocialPreview({
+    const socialFile = await processor.createSocialPreview({
       width,
       height,
       title: options.title || this.config.appName,
@@ -251,11 +256,12 @@ export class PlatformGenerator {
       template: options.template,
       background: this.config.backgroundColor
     });
-
-    await processor.save(outputPath, {
+    const finalProcessor = new ImageProcessor(socialFile);
+    await finalProcessor.save(outputPath, {
       format: 'png',
       quality: this.config.output.quality
     });
+    await processor.cleanup();
   }
 
   /**
@@ -266,7 +272,7 @@ export class PlatformGenerator {
     const outputPath = path.join(this.config.output.path, 'mastodon.png');
 
     const processor = new ImageProcessor(this.sourceImage);
-    processor.createSocialPreview({
+    const socialFile = await processor.createSocialPreview({
       width,
       height,
       title: options.title || this.config.appName,
@@ -274,11 +280,12 @@ export class PlatformGenerator {
       template: options.template,
       background: this.config.backgroundColor
     });
-
-    await processor.save(outputPath, {
+    const finalProcessor = new ImageProcessor(socialFile);
+    await finalProcessor.save(outputPath, {
       format: 'png',
       quality: this.config.output.quality
     });
+    await processor.cleanup();
   }
 
   /**

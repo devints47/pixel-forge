@@ -1,5 +1,6 @@
 const js = require('@eslint/js');
 const tseslint = require('typescript-eslint');
+const promise = require('eslint-plugin-promise');
 
 module.exports = tseslint.config(
   {
@@ -19,6 +20,7 @@ module.exports = tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
+  promise.configs['flat/recommended'],
   
   {
     files: ['**/*.ts', '**/*.tsx'],
@@ -42,6 +44,7 @@ module.exports = tseslint.config(
       'no-console': 'off', // CLI tool - console output is expected
       'prefer-const': 'error',
       'no-var': 'error',
+      '@typescript-eslint/no-floating-promises': 'error'
     }
   }
 ); 

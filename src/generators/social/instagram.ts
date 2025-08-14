@@ -49,7 +49,7 @@ export class InstagramGenerator {
     const outputPath = path.join(this.config.output.path, 'instagram-square.png');
 
     const processor = new ImageProcessor(this.sourceImage);
-    processor.createSocialPreview({
+    const socialFile = await processor.createSocialPreview({
       width,
       height,
       title: options.title || this.config.appName,
@@ -57,11 +57,12 @@ export class InstagramGenerator {
       template: options.template,
       background: this.config.backgroundColor
     });
-
-    await processor.save(outputPath, {
+    const finalProcessor = new ImageProcessor(socialFile);
+    await finalProcessor.save(outputPath, {
       format: 'png',
       quality: this.config.output.quality
     });
+    await processor.cleanup();
   }
 
   /**
@@ -72,7 +73,7 @@ export class InstagramGenerator {
     const outputPath = path.join(this.config.output.path, 'instagram-portrait.png');
 
     const processor = new ImageProcessor(this.sourceImage);
-    processor.createSocialPreview({
+    const socialFile = await processor.createSocialPreview({
       width,
       height,
       title: options.title || this.config.appName,
@@ -80,11 +81,12 @@ export class InstagramGenerator {
       template: options.template,
       background: this.config.backgroundColor
     });
-
-    await processor.save(outputPath, {
+    const finalProcessor = new ImageProcessor(socialFile);
+    await finalProcessor.save(outputPath, {
       format: 'png',
       quality: this.config.output.quality
     });
+    await processor.cleanup();
   }
 
   /**
@@ -95,7 +97,7 @@ export class InstagramGenerator {
     const outputPath = path.join(this.config.output.path, 'instagram-landscape.png');
 
     const processor = new ImageProcessor(this.sourceImage);
-    processor.createSocialPreview({
+    const socialFile = await processor.createSocialPreview({
       width,
       height,
       title: options.title || this.config.appName,
@@ -103,11 +105,12 @@ export class InstagramGenerator {
       template: options.template,
       background: this.config.backgroundColor
     });
-
-    await processor.save(outputPath, {
+    const finalProcessor = new ImageProcessor(socialFile);
+    await finalProcessor.save(outputPath, {
       format: 'png',
       quality: this.config.output.quality
     });
+    await processor.cleanup();
   }
 
   /**
@@ -118,7 +121,7 @@ export class InstagramGenerator {
     const outputPath = path.join(this.config.output.path, 'instagram-stories.png');
 
     const processor = new ImageProcessor(this.sourceImage);
-    processor.createSocialPreview({
+    const socialFile = await processor.createSocialPreview({
       width,
       height,
       title: options.title || this.config.appName,
@@ -126,11 +129,12 @@ export class InstagramGenerator {
       template: options.template || 'gradient',
       background: this.config.backgroundColor
     });
-
-    await processor.save(outputPath, {
+    const finalProcessor = new ImageProcessor(socialFile);
+    await finalProcessor.save(outputPath, {
       format: 'png',
       quality: this.config.output.quality
     });
+    await processor.cleanup();
   }
 
   /**
@@ -141,7 +145,7 @@ export class InstagramGenerator {
     const outputPath = path.join(this.config.output.path, 'instagram-reels.png');
 
     const processor = new ImageProcessor(this.sourceImage);
-    processor.createSocialPreview({
+    const socialFile = await processor.createSocialPreview({
       width,
       height,
       title: options.title || this.config.appName,
@@ -149,11 +153,12 @@ export class InstagramGenerator {
       template: options.template || 'gradient',
       background: this.config.backgroundColor
     });
-
-    await processor.save(outputPath, {
+    const finalProcessor = new ImageProcessor(socialFile);
+    await finalProcessor.save(outputPath, {
       format: 'png',
       quality: this.config.output.quality
     });
+    await processor.cleanup();
   }
 
   /**
