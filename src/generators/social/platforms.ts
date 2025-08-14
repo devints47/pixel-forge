@@ -154,7 +154,7 @@ export class PlatformGenerator {
     const outputPath = path.join(this.config.output.path, 'pinterest-pin.png');
 
     const processor = new ImageProcessor(this.sourceImage);
-    processor.createSocialPreview({
+    const socialFile = await processor.createSocialPreview({
       width,
       height,
       title: options.title || this.config.appName,
@@ -162,11 +162,12 @@ export class PlatformGenerator {
       template: options.template || 'gradient',
       background: this.config.backgroundColor
     });
-
-    await processor.save(outputPath, {
+    const finalProcessor = new ImageProcessor(socialFile);
+    await finalProcessor.save(outputPath, {
       format: 'png',
       quality: this.config.output.quality
     });
+    await processor.cleanup();
   }
 
   /**
@@ -201,7 +202,7 @@ export class PlatformGenerator {
     const outputPath = path.join(this.config.output.path, 'snapchat.png');
 
     const processor = new ImageProcessor(this.sourceImage);
-    processor.createSocialPreview({
+    const socialFile = await processor.createSocialPreview({
       width,
       height,
       title: options.title || this.config.appName,
@@ -209,11 +210,12 @@ export class PlatformGenerator {
       template: options.template || 'gradient',
       background: this.config.backgroundColor
     });
-
-    await processor.save(outputPath, {
+    const finalProcessor = new ImageProcessor(socialFile);
+    await finalProcessor.save(outputPath, {
       format: 'png',
       quality: this.config.output.quality
     });
+    await processor.cleanup();
   }
 
   /**

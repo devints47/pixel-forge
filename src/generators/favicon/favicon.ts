@@ -132,7 +132,7 @@ export class FaviconGenerator {
       await finalProcessor.save(outputPath, { format: 'ico' });
       await processor.cleanup();
       await finalProcessor.cleanup();
-    } catch (error) {
+    } catch (_error) {
       // Fallback to PNG with ICO extension for compatibility
       console.warn('ICO generation failed, falling back to PNG format');
       const resizedFile = await processor.resize(32, 32, { 
@@ -170,7 +170,7 @@ export class FaviconGenerator {
         await finalProcessor.save(outputPath, { format: 'svg' });
         await processor.cleanup();
         await finalProcessor.cleanup();
-      } catch (error) {
+      } catch (_error) {
         // Fallback to PNG with SVG extension if SVG conversion fails
         console.warn('SVG generation failed, creating PNG with SVG extension for compatibility');
         const resizedFile = await processor.resize(64, 64, { 
