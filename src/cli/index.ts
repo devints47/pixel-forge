@@ -16,6 +16,7 @@ import { PWAGenerator } from '../generators/pwa/pwa';
 import { WebSEOGenerator } from '../generators/web/seo';
 import { type PixelForgeConfig } from '../core/config-validator';
 import { SUPPORTED_INPUT_FORMATS, ImageProcessor } from '../core/image-processor';
+import readline from 'readline';
 
 // Import package.json as a module instead of using require
 import packageJson from '../../package.json';
@@ -25,16 +26,41 @@ import packageJson from '../../package.json';
  */
 async function checkImageMagickAvailability(): Promise<void> {
   const isAvailable = await ImageProcessor.checkImageMagick();
-  
   if (!isAvailable) {
-    console.error(chalk.red('\n❌ ImageMagick is required but not found!\n'));
-    console.error(chalk.yellow('Please install ImageMagick first:\n'));
-    console.error(chalk.cyan('  macOS:'), '        brew install imagemagick');
-    console.error(chalk.cyan('  Ubuntu/Debian:'), ' sudo apt-get install imagemagick');
-    console.error(chalk.cyan('  Windows:'), '      choco install imagemagick');
-    console.error(chalk.cyan('  Or download:'), '   https://imagemagick.org/script/download.php\n');
-    console.error(chalk.gray('After installation, restart your terminal and try again.\n'));
-    process.exit(1);
+    // Offer fallback to Jimp with a warning, or guide to install ImageMagick
+    console.log(chalk.yellow('\n⚠️  ImageMagick not found.'));
+    console.log(chalk.gray('For best quality and full format support, install ImageMagick:'));
+    console.log(chalk.cyan('  macOS:'), '        brew install imagemagick');
+    console.log(chalk.cyan('  Ubuntu/Debian:'), ' sudo apt-get install imagemagick');
+    console.log(chalk.cyan('  Windows:'), '      choco install imagemagick');
+    console.log(chalk.cyan('  Download:'), '     https://imagemagick.org/script/download.php\n');
+
+    // Interactive prompt only when running in a TTY; otherwise default to Jimp fallback
+    const shouldPrompt = process.stdin.isTTY && process.stdout.isTTY;
+    if (!shouldPrompt) {
+      console.log(chalk.yellow('Continuing with Jimp fallback (reduced quality/feature set).'));
+      ImageProcessor.setEngine('jimp');
+      return;
+    }
+
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    const answer: string = await new Promise((resolve) => {
+      rl.question(
+        chalk.yellow('Proceed with fallback engine (Jimp) now? [Y/n] '),
+        (res) => resolve(res.trim().toLowerCase())
+      );
+    });
+    rl.close();
+
+    if (answer === 'n' || answer === 'no') {
+      console.log(chalk.red('Exiting. Please install ImageMagick and re-run the command.'));
+      process.exit(1);
+    }
+
+    console.log(chalk.yellow('Using Jimp fallback engine. Note: some formats/features may be limited.'));
+    ImageProcessor.setEngine('jimp');
+  } else {
+    ImageProcessor.setEngine('magick');
   }
 }
 

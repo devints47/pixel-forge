@@ -2,6 +2,42 @@ import { execFile } from 'child_process';
 import { promisify } from 'util';
 import path from 'path';
 import { promises as fs } from 'fs';
+// Minimal Jimp typing to avoid unsafe any while supporting ESM dynamic import
+type JimpImage = {
+  bitmap: { width: number; height: number; data: Buffer };
+  scale: (factor: number) => JimpImage;
+  resize: (w: number, h: number, mode: number) => JimpImage;
+  crop: (x: number, y: number, w: number, h: number) => JimpImage;
+  composite: (src: JimpImage, x: number, y: number) => JimpImage;
+  writeAsync: (path: string) => Promise<void>;
+  print: (font: unknown, x: number, y: number, text: string) => JimpImage;
+  scan: (x: number, y: number, w: number, h: number, cb: (x: number, y: number, idx: number) => void) => void;
+  quality: (q: number) => JimpImage;
+};
+
+type JimpConstructor = {
+  new (w: number, h: number, bg: number): JimpImage;
+  read: (path: string) => Promise<JimpImage>;
+  loadFont: (font: string) => Promise<unknown>;
+  measureText: (font: unknown, text: string) => number;
+  measureTextHeight: (font: unknown, text: string, maxWidth: number) => number;
+  RESIZE_BICUBIC: number;
+  FONT_SANS_8_WHITE: string; FONT_SANS_8_BLACK: string;
+  FONT_SANS_16_WHITE: string; FONT_SANS_16_BLACK: string;
+  FONT_SANS_32_WHITE: string; FONT_SANS_32_BLACK: string;
+  FONT_SANS_64_WHITE: string; FONT_SANS_64_BLACK: string;
+  FONT_SANS_128_WHITE: string; FONT_SANS_128_BLACK: string;
+};
+
+// Dynamic import for Jimp (ESM-only) to avoid CJS runtime issues
+let _jimpModule: JimpConstructor | null = null;
+async function getJimp(): Promise<JimpConstructor> {
+  if (_jimpModule) return _jimpModule;
+  const mod = await import('jimp');
+  const resolved = (mod as { default?: unknown }).default ?? (mod as unknown);
+  _jimpModule = resolved as JimpConstructor;
+  return _jimpModule;
+}
 
 const execFileAsync = promisify(execFile);
 
@@ -35,15 +71,54 @@ export interface TextOptions {
   offset?: { x: number; y: number };
 }
 
+function parseHexToRgb(hex: string): { r: number; g: number; b: number } {
+  const cleaned = hex.replace('#', '');
+  const r = parseInt(cleaned.substring(0, 2), 16) || 0;
+  const g = parseInt(cleaned.substring(2, 4), 16) || 0;
+  const b = parseInt(cleaned.substring(4, 6), 16) || 0;
+  return { r, g, b };
+}
+
+function chooseNearestFontSize(target: number): 8 | 16 | 32 | 64 | 128 { // Jimp bundled fonts
+  if (target <= 12) return 8;
+  if (target <= 24) return 16;
+  if (target <= 48) return 32;
+  if (target <= 96) return 64;
+  return 128;
+}
+
+function chooseFontConstant(Jimp: JimpConstructor, size: 8 | 16 | 32 | 64 | 128, color: string): string {
+  const isWhite = (color || '').toLowerCase() === '#ffffff' || (color || '').toLowerCase() === 'white';
+  switch (size) {
+    case 8: return isWhite ? Jimp.FONT_SANS_8_WHITE : Jimp.FONT_SANS_8_BLACK;
+    case 16: return isWhite ? Jimp.FONT_SANS_16_WHITE : Jimp.FONT_SANS_16_BLACK;
+    case 32: return isWhite ? Jimp.FONT_SANS_32_WHITE : Jimp.FONT_SANS_32_BLACK;
+    case 64: return isWhite ? Jimp.FONT_SANS_64_WHITE : Jimp.FONT_SANS_64_BLACK;
+    case 128: return isWhite ? Jimp.FONT_SANS_128_WHITE : Jimp.FONT_SANS_128_BLACK;
+  }
+}
+
 // List of supported input formats
 export const SUPPORTED_INPUT_FORMATS = ['.png', '.jpg', '.jpeg', '.webp', '.avif', '.tiff', '.tif', '.gif', '.svg', '.bmp'];
 
 export class ImageProcessor {
   private source: string;
   private tempFiles: string[] = [];
+  private static engine: 'magick' | 'jimp' = 'magick';
 
   constructor(source: string) {
     this.source = source;
+  }
+
+  /**
+   * Select image processing engine. Defaults to 'magick'.
+   */
+  static setEngine(engine: 'magick' | 'jimp'): void {
+    ImageProcessor.engine = engine;
+  }
+
+  static getEngine(): 'magick' | 'jimp' {
+    return ImageProcessor.engine;
   }
 
   /**
@@ -135,6 +210,60 @@ export class ImageProcessor {
       return this.createMockOutputFile();
     }
 
+    // Jimp fallback engine
+    if (ImageProcessor.getEngine() === 'jimp') {
+      const Jimp = await getJimp();
+      const tempOutput = path.join(path.dirname(this.source), `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.png`);
+      this.tempFiles.push(tempOutput);
+      const img = await Jimp.read(this.source);
+
+      if (zoom !== 1.0) {
+        img.scale(zoom);
+      }
+
+      const srcW = img.bitmap.width;
+      const srcH = img.bitmap.height;
+
+      const computeScale = (mode: 'cover' | 'contain' | 'fill'): number => {
+        if (mode === 'fill') {
+          return Math.min(width / srcW, height / srcH);
+        }
+        if (mode === 'cover') {
+          return Math.max(width / srcW, height / srcH);
+        }
+        // contain
+        return Math.min(width / srcW, height / srcH);
+      };
+
+      const scale = computeScale(fit);
+      img.resize(
+        Math.max(1, Math.ceil(srcW * scale)),
+        Math.max(1, Math.ceil(srcH * scale)),
+        Jimp.RESIZE_BICUBIC
+      );
+
+      if (fit === 'cover') {
+        const x = Math.max(0, Math.floor((img.bitmap.width - width) / 2));
+        const y = Math.max(0, Math.floor((img.bitmap.height - height) / 2));
+        img.crop(x, y, Math.min(width, img.bitmap.width), Math.min(height, img.bitmap.height));
+      } else if (fit === 'contain') {
+        const { r: br, g: bg, b: bb } = parseHexToRgb(background);
+        const bgColor = background === 'transparent' ? 0x00000000 : ((br & 0xff) << 24) + ((bg & 0xff) << 16) + ((bb & 0xff) << 8) + 0xff;
+        const canvas = new Jimp(width, height, bgColor);
+        const x = Math.floor((width - img.bitmap.width) / 2);
+        const y = Math.floor((height - img.bitmap.height) / 2);
+        canvas.composite(img, x, y);
+        await canvas.writeAsync(tempOutput);
+        return tempOutput;
+      } else {
+        // fill already resized to target ratio; enforce target dimensions exactly
+        img.resize(width, height, Jimp.RESIZE_BICUBIC);
+      }
+
+      await img.writeAsync(tempOutput);
+      return tempOutput;
+    }
+
     const tempOutput = path.join(path.dirname(this.source), `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.png`);
     this.tempFiles.push(tempOutput);
 
@@ -202,6 +331,38 @@ export class ImageProcessor {
       return this.createMockOutputFile();
     }
 
+    // Jimp fallback engine
+    if (ImageProcessor.getEngine() === 'jimp') {
+      const Jimp = await getJimp();
+      const tempOutput = path.join(path.dirname(this.source), `temp-text-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.png`);
+      this.tempFiles.push(tempOutput);
+      const img = await Jimp.read(inputFile);
+
+      const selectedSize = chooseNearestFontSize(options.fontSize ?? 32);
+      const fontConst = chooseFontConstant(Jimp, selectedSize, options.color ?? '#ffffff');
+      const font = await Jimp.loadFont(fontConst);
+
+      const text = options.text;
+      const textWidth = Jimp.measureText(font, text);
+      const textHeight = Jimp.measureTextHeight(font, text, textWidth);
+
+      let x = Math.floor((img.bitmap.width - textWidth) / 2);
+      let y = Math.floor((img.bitmap.height - textHeight) / 2);
+      if (options.position === 'top') {
+        y = Math.floor(img.bitmap.height * 0.15) - Math.floor(textHeight / 2);
+      } else if (options.position === 'bottom') {
+        y = Math.floor(img.bitmap.height * 0.85) - Math.floor(textHeight / 2);
+      }
+      if (options.offset) {
+        x += options.offset.x;
+        y += options.offset.y;
+      }
+
+      img.print(font, x, y, text);
+      await img.writeAsync(tempOutput);
+      return tempOutput;
+    }
+
     const tempOutput = path.join(path.dirname(this.source), `temp-text-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.png`);
     this.tempFiles.push(tempOutput);
 
@@ -239,6 +400,25 @@ export class ImageProcessor {
       return this.createMockOutputFile();
     }
 
+    // Jimp fallback engine
+    if (ImageProcessor.getEngine() === 'jimp') {
+      const Jimp = await getJimp();
+      const tempOutput = path.join(path.dirname(this.source), `temp-color-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.png`);
+      this.tempFiles.push(tempOutput);
+      const img = await Jimp.read(inputFile);
+      const { r, g, b } = parseHexToRgb(color);
+      const overlay = new Jimp(img.bitmap.width, img.bitmap.height, 0x00000000);
+      overlay.scan(0, 0, overlay.bitmap.width, overlay.bitmap.height, (x: number, y: number, idx: number) => {
+        overlay.bitmap.data[idx + 0] = r;
+        overlay.bitmap.data[idx + 1] = g;
+        overlay.bitmap.data[idx + 2] = b;
+        overlay.bitmap.data[idx + 3] = Math.round(255 * opacity);
+      });
+      img.composite(overlay, 0, 0);
+      await img.writeAsync(tempOutput);
+      return tempOutput;
+    }
+
     const tempOutput = path.join(path.dirname(this.source), `temp-color-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.png`);
     this.tempFiles.push(tempOutput);
 
@@ -266,6 +446,30 @@ export class ImageProcessor {
     // Use mock implementation in test mode
     if (MOCK_MODE) {
       await this.createMockOutputFile(outputPath);
+      return;
+    }
+    
+    // Jimp fallback engine
+    if (ImageProcessor.getEngine() === 'jimp') {
+      const Jimp = await getJimp();
+      // Only basic formats supported in fallback
+      let format = path.extname(outputPath).slice(1).toLowerCase();
+      if (options.format) format = options.format;
+      if (format === 'jpg') format = 'jpeg';
+      if (!['png', 'jpeg', 'webp'].includes(format)) {
+        throw new Error('Jimp fallback supports only png, jpeg, and webp outputs. Please install ImageMagick for advanced formats.');
+      }
+      const quality = options.quality || 90;
+      const img = await Jimp.read(this.source);
+      if (format === 'jpeg') {
+        img.quality(quality);
+      }
+      if (format === 'webp') {
+        // Jimp uses quality for webp as well
+        img.quality(quality);
+      }
+      await fs.mkdir(path.dirname(outputPath), { recursive: true });
+      await img.writeAsync(outputPath);
       return;
     }
     
@@ -344,7 +548,7 @@ export class ImageProcessor {
    */
   async generateSizes(sizes: Array<{ width: number; height: number; name: string }>, outputDir: string, options: ImageProcessorOptions = {}): Promise<void> {
     // In mock mode, skip ImageMagick check
-    if (!MOCK_MODE) {
+    if (!MOCK_MODE && ImageProcessor.getEngine() === 'magick') {
       // Check ImageMagick availability first
       const isAvailable = await ImageProcessor.checkImageMagick();
       if (!isAvailable) {
