@@ -110,9 +110,14 @@ jobs:
 
     - name: Test CLI installation
       run: |
-        pnpm pack
-        TARBALL="$(ls pixel-forge-*.tgz)"
-        pnpm add -g "$(pwd)/$TARBALL"
+        set -euo pipefail
+        PKG_NAME=$(node -p "require('./package.json').name")
+        PKG_VER=$(node -p "require('./package.json').version")
+        TARBALL="$PKG_NAME-$PKG_VER.tgz"
+        pnpm pack --pack-destination .
+        echo "Tarball expected: $TARBALL"
+        ls -la "${TARBALL}"
+        pnpm i -g "$(pwd)/$TARBALL"
     
         echo "Global pnpm bin is: $(pnpm bin -g)"
         export PATH="$(pnpm bin -g):$PATH"
