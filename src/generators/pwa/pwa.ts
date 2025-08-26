@@ -83,6 +83,7 @@ export class PWAGenerator {
       const finalProcessor = new ImageProcessor(resizedFile);
       await finalProcessor.save(outputPath);
       await processor.cleanup();
+      await finalProcessor.cleanup();
     }
 
     // Generate maskable icons (with safe area)
@@ -112,6 +113,7 @@ export class PWAGenerator {
       const finalProcessor = new ImageProcessor(resizedFile);
       await finalProcessor.save(outputPath);
       await processor.cleanup();
+      await finalProcessor.cleanup();
     }
   }
 
@@ -133,6 +135,7 @@ export class PWAGenerator {
       const finalProcessor = new ImageProcessor(resizedFile);
       await finalProcessor.save(outputPath);
       await processor.cleanup();
+      await finalProcessor.cleanup();
     }
   }
 
@@ -154,6 +157,7 @@ export class PWAGenerator {
       const finalProcessor = new ImageProcessor(resizedFile);
       await finalProcessor.save(outputPath);
       await processor.cleanup();
+      await finalProcessor.cleanup();
     }
   }
 
