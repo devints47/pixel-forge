@@ -135,7 +135,7 @@ export class InstagramGenerator {
     const socialFile = await processor.createSocialPreview({
       width,
       height,
-      title: options.title || this.config.appName,
+      title: options.title,
       description: options.description,
       template: options.template || 'basic',
       background: this.config.backgroundColor
@@ -159,7 +159,7 @@ export class InstagramGenerator {
     const socialFile = await processor.createSocialPreview({
       width,
       height,
-      title: options.title || this.config.appName,
+      title: options.title,
       description: options.description,
       template: options.template || 'basic',
       background: this.config.backgroundColor

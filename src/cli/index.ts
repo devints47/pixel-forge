@@ -270,7 +270,7 @@ async function generateSpecific(sourceImage: string, config: PixelForgeConfig, o
 
   if (options.instagram) {
     const generator = new InstagramGenerator(sourceImage, config);
-    await generator.generate({ includeStories: false, includeReels: false }); // Avoid text overlay issues
+    await generator.generate({ includeStories: true, includeReels: true });
     generators.push({ name: 'Instagram', generator, files: generator.getGeneratedFiles() });
   }
 
