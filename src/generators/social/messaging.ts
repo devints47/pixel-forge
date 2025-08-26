@@ -103,6 +103,8 @@ export class MessagingGenerator {
       quality: this.config.output.quality
     });
     await processor.cleanup();
+    await finalProcessor.cleanup();
+    await finalProcessor.cleanup();
   }
 
   /**
@@ -129,6 +131,7 @@ export class MessagingGenerator {
       quality: this.config.output.quality
     });
     await squareProcessor.cleanup();
+    await squareFinal.cleanup();
 
     // Link preview format
     const { width: linkWidth, height: linkHeight } = ImageSizes.messaging.whatsappLink;
@@ -150,6 +153,7 @@ export class MessagingGenerator {
       quality: this.config.output.quality
     });
     await linkProcessor.cleanup();
+    await linkFinal.cleanup();
   }
 
   /**
@@ -175,6 +179,7 @@ export class MessagingGenerator {
       quality: this.config.output.quality
     });
     await processor.cleanup();
+    await finalProcessor.cleanup();
   }
 
   /**
@@ -200,6 +205,7 @@ export class MessagingGenerator {
       quality: this.config.output.quality
     });
     await processor.cleanup();
+    await finalProcessor.cleanup();
   }
 
   /**
@@ -225,6 +231,7 @@ export class MessagingGenerator {
       quality: this.config.output.quality
     });
     await processor.cleanup();
+    await finalProcessor.cleanup();
   }
 
   /**
@@ -250,6 +257,7 @@ export class MessagingGenerator {
       quality: this.config.output.quality
     });
     await processor.cleanup();
+    await finalProcessor.cleanup();
   }
 
   /**
@@ -275,6 +283,7 @@ export class MessagingGenerator {
       quality: this.config.output.quality
     });
     await processor.cleanup();
+    await finalProcessor.cleanup();
   }
 
   /**
@@ -300,6 +309,7 @@ export class MessagingGenerator {
       quality: this.config.output.quality
     });
     await processor.cleanup();
+    await finalProcessor.cleanup();
   }
 
   /**
@@ -324,6 +334,7 @@ export class MessagingGenerator {
       quality: this.config.output.quality
     });
     await processor.cleanup();
+    await finalProcessor.cleanup();
   }
 
   /**

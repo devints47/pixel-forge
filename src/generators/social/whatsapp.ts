@@ -66,20 +66,28 @@ export class WhatsAppGenerator {
    */
   private async generateLinkPreviewImage(title?: string, description?: string, template?: 'basic' | 'gradient' | 'custom'): Promise<void> {
     const processor = new ImageProcessor(this.sourceImage);
-    const outputPath = path.join(this.config.output.path, 'whatsapp-link.png');
-
-    const socialFile = await processor.createSocialPreview({
-      width: ImageSizes.messaging.whatsappLink.width,
-      height: ImageSizes.messaging.whatsappLink.height,
-      title,
-      description,
-      template,
-      background: this.config.backgroundColor
-    });
+    let finalProcessor: ImageProcessor | undefined;
     
-    const finalProcessor = new ImageProcessor(socialFile);
-    await finalProcessor.save(outputPath);
-    await processor.cleanup();
+    try {
+      const outputPath = path.join(this.config.output.path, 'whatsapp-link.png');
+
+      const socialFile = await processor.createSocialPreview({
+        width: ImageSizes.messaging.whatsappLink.width,
+        height: ImageSizes.messaging.whatsappLink.height,
+        title,
+        description,
+        template,
+        background: this.config.backgroundColor
+      });
+      
+      finalProcessor = new ImageProcessor(socialFile);
+      await finalProcessor.save(outputPath);
+    } finally {
+      await processor.cleanup();
+      if (finalProcessor) {
+        await finalProcessor.cleanup();
+      }
+    }
   }
 
   /**
@@ -87,20 +95,28 @@ export class WhatsAppGenerator {
    */
   private async generateStandardImage(title?: string, description?: string, template?: 'basic' | 'gradient' | 'custom'): Promise<void> {
     const processor = new ImageProcessor(this.sourceImage);
-    const outputPath = path.join(this.config.output.path, 'whatsapp-share.png');
-
-         const socialFile = await processor.createSocialPreview({
-       width: ImageSizes.messaging.whatsappLink.width,
-       height: ImageSizes.messaging.whatsappLink.height,
-       title,
-       description,
-       template,
-       background: this.config.backgroundColor
-     });
+    let finalProcessor: ImageProcessor | undefined;
     
-    const finalProcessor = new ImageProcessor(socialFile);
-    await finalProcessor.save(outputPath);
-    await processor.cleanup();
+    try {
+      const outputPath = path.join(this.config.output.path, 'whatsapp-share.png');
+
+      const socialFile = await processor.createSocialPreview({
+        width: ImageSizes.messaging.whatsappLink.width,
+        height: ImageSizes.messaging.whatsappLink.height,
+        title,
+        description,
+        template,
+        background: this.config.backgroundColor
+      });
+      
+      finalProcessor = new ImageProcessor(socialFile);
+      await finalProcessor.save(outputPath);
+    } finally {
+      await processor.cleanup();
+      if (finalProcessor) {
+        await finalProcessor.cleanup();
+      }
+    }
   }
 
   /**
@@ -108,20 +124,28 @@ export class WhatsAppGenerator {
    */
   private async generateSquareImage(title?: string, description?: string, template?: 'basic' | 'gradient' | 'custom'): Promise<void> {
     const processor = new ImageProcessor(this.sourceImage);
-    const outputPath = path.join(this.config.output.path, 'whatsapp-square.png');
-
-    const socialFile = await processor.createSocialPreview({
-      width: 1200,
-      height: 1200,
-      title,
-      description,
-      template,
-      background: this.config.backgroundColor
-    });
+    let finalProcessor: ImageProcessor | undefined;
     
-    const finalProcessor = new ImageProcessor(socialFile);
-    await finalProcessor.save(outputPath);
-    await processor.cleanup();
+    try {
+      const outputPath = path.join(this.config.output.path, 'whatsapp-square.png');
+
+      const socialFile = await processor.createSocialPreview({
+        width: 1200,
+        height: 1200,
+        title,
+        description,
+        template,
+        background: this.config.backgroundColor
+      });
+      
+      finalProcessor = new ImageProcessor(socialFile);
+      await finalProcessor.save(outputPath);
+    } finally {
+      await processor.cleanup();
+      if (finalProcessor) {
+        await finalProcessor.cleanup();
+      }
+    }
   }
 
   /**
