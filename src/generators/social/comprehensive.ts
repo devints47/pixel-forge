@@ -1,5 +1,5 @@
 import { OpenGraphGenerator } from './opengraph';
-import { InstagramGenerator } from './instagram';
+import { InstagramGenerator } from './platforms/instagram';
 import { MessagingGenerator } from './messaging';
 import { PlatformGenerator } from './platforms';
 import type { PixelForgeConfig } from '../../core/config-validator';
