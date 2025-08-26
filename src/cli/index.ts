@@ -364,79 +364,27 @@ async function generateSpecific(sourceImage: string, config: PixelForgeConfig, o
   }
 
   if (options.discord) {
-    const generator = new ComprehensiveSocialGenerator(sourceImage, config);
-    await generator.generate({
-      includeStandard: false,
-      includeInstagram: false,
-      includeMessaging: true,
-      includePlatforms: false,
-      platforms: {
-        imessage: false,
-        whatsapp: false,
-        discord: true,
-        telegram: false,
-        signal: false,
-        slack: false
-      }
-    });
-    generators.push({ name: 'Discord', generator, files: ['discord.png'] });
+    const discordGenerator = new DiscordGenerator(sourceImage, config);
+    await discordGenerator.generate();
+    generators.push({ name: 'Discord', generator: discordGenerator, files: discordGenerator.getGeneratedFiles() });
   }
 
   if (options.telegram) {
-    const generator = new ComprehensiveSocialGenerator(sourceImage, config);
-    await generator.generate({
-      includeStandard: false,
-      includeInstagram: false,
-      includeMessaging: true,
-      includePlatforms: false,
-      platforms: {
-        imessage: false,
-        whatsapp: false,
-        discord: false,
-        telegram: true,
-        signal: false,
-        slack: false
-      }
-    });
-    generators.push({ name: 'Telegram', generator, files: ['telegram.png'] });
+    const telegramGenerator = new TelegramGenerator(sourceImage, config);
+    await telegramGenerator.generate();
+    generators.push({ name: 'Telegram', generator: telegramGenerator, files: telegramGenerator.getGeneratedFiles() });
   }
 
   if (options.signal) {
-    const generator = new ComprehensiveSocialGenerator(sourceImage, config);
-    await generator.generate({
-      includeStandard: false,
-      includeInstagram: false,
-      includeMessaging: true,
-      includePlatforms: false,
-      platforms: {
-        imessage: false,
-        whatsapp: false,
-        discord: false,
-        telegram: false,
-        signal: true,
-        slack: false
-      }
-    });
-    generators.push({ name: 'Signal', generator, files: ['signal.png'] });
+    const signalGenerator = new SignalGenerator(sourceImage, config);
+    await signalGenerator.generate();
+    generators.push({ name: 'Signal', generator: signalGenerator, files: signalGenerator.getGeneratedFiles() });
   }
 
   if (options.slack) {
-    const generator = new ComprehensiveSocialGenerator(sourceImage, config);
-    await generator.generate({
-      includeStandard: false,
-      includeInstagram: false,
-      includeMessaging: true,
-      includePlatforms: false,
-      platforms: {
-        imessage: false,
-        whatsapp: false,
-        discord: false,
-        telegram: false,
-        signal: false,
-        slack: true
-      }
-    });
-    generators.push({ name: 'Slack', generator, files: ['slack.png'] });
+    const slackGenerator = new SlackGenerator(sourceImage, config);
+    await slackGenerator.generate();
+    generators.push({ name: 'Slack', generator: slackGenerator, files: slackGenerator.getGeneratedFiles() });
   }
 
   if (options.androidrcs) {
@@ -460,22 +408,9 @@ async function generateSpecific(sourceImage: string, config: PixelForgeConfig, o
   }
 
   if (options.threads) {
-    const generator = new ComprehensiveSocialGenerator(sourceImage, config);
-    await generator.generate({
-      includeStandard: false,
-      includeInstagram: false,
-      includeMessaging: false,
-      includePlatforms: true,
-      platforms: {
-        threads: true,
-        youtube: false,
-        tiktok: false,
-        pinterest: false,
-        bluesky: false,
-        mastodon: false
-      }
-    });
-    generators.push({ name: 'Threads', generator, files: ['threads.png'] });
+    const threadsGenerator = new ThreadsGenerator(sourceImage, config);
+    await threadsGenerator.generate();
+    generators.push({ name: 'Threads', generator: threadsGenerator, files: threadsGenerator.getGeneratedFiles() });
   }
 
   if (options.bluesky) {
