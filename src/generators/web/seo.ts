@@ -26,8 +26,9 @@ export class WebSEOGenerator {
    */
   async generate(options: WebSEOOptions = {}): Promise<void> {
     const {
-      title = this.config.socialPreview?.title || this.config.appName,
-      description = this.config.socialPreview?.description || this.config.description || '',
+      // Only use title/description if explicitly provided - don't use config defaults for clean brand images
+      title = options.title, // undefined unless explicitly set
+      description = options.description, // undefined unless explicitly set
       template = this.config.socialPreview?.template || 'basic',
       includeOpenGraph = true,
       includeTwitter = true,
@@ -55,8 +56,8 @@ export class WebSEOGenerator {
    * Generate generic og-image that works across all platforms
    */
   private async generateGenericOpenGraph(options: {
-    title: string;
-    description: string;
+    title?: string;
+    description?: string;
     template: string;
     outputFormat: string;
   }): Promise<void> {
@@ -94,8 +95,8 @@ export class WebSEOGenerator {
    * Generate OpenGraph-specific image
    */
   private async generateOpenGraphImage(options: {
-    title: string;
-    description: string;
+    title?: string;
+    description?: string;
     template: string;
     outputFormat: string;
   }): Promise<void> {
@@ -132,8 +133,8 @@ export class WebSEOGenerator {
    * Generate Twitter card image
    */
   private async generateTwitterCardImage(options: {
-    title: string;
-    description: string;
+    title?: string;
+    description?: string;
     template: string;
     outputFormat: string;
   }): Promise<void> {

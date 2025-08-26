@@ -14,6 +14,7 @@ export interface TwitterOptions {
 export class TwitterGenerator {
   private config: PixelForgeConfig;
   private sourceImage: string;
+  private generatedFiles: string[] = [];
 
   constructor(sourceImage: string, config: PixelForgeConfig) {
     this.config = config;
@@ -32,12 +33,17 @@ export class TwitterGenerator {
       template = 'basic'
     } = options;
 
+    // Reset generated files list
+    this.generatedFiles = [];
+
     if (includeStandard) {
       await this.generateStandardImage(title, description, template);
+      this.generatedFiles.push('twitter-card.png');
     }
 
     if (includeSquare) {
       await this.generateSquareImage(title, description, template);
+      this.generatedFiles.push('twitter-square.png');
     }
   }
 
@@ -132,6 +138,6 @@ export class TwitterGenerator {
    * Get list of generated files
    */
   getGeneratedFiles(): string[] {
-    return ['twitter.png', 'twitter-square.png'];
+    return [...this.generatedFiles];
   }
 } 

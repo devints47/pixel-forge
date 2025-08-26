@@ -13,6 +13,7 @@ export interface FacebookOptions {
 export class FacebookGenerator {
   private config: PixelForgeConfig;
   private sourceImage: string;
+  private generatedFiles: string[] = [];
 
   constructor(sourceImage: string, config: PixelForgeConfig) {
     this.config = config;
@@ -31,12 +32,17 @@ export class FacebookGenerator {
       template = 'basic'
     } = options;
 
+    // Reset generated files list
+    this.generatedFiles = [];
+
     if (includeStandard) {
       await this.generateStandardImage(title, description, template);
+      this.generatedFiles.push('facebook-og.png');
     }
 
     if (includeSquare) {
       await this.generateSquareImage(title, description, template);
+      this.generatedFiles.push('facebook-square.png');
     }
   }
 
@@ -125,6 +131,6 @@ export class FacebookGenerator {
    * Get list of generated files
    */
   getGeneratedFiles(): string[] {
-    return ['facebook.png', 'facebook-square.png'];
+    return [...this.generatedFiles];
   }
 } 

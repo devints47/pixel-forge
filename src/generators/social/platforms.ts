@@ -205,8 +205,8 @@ export class PlatformGenerator {
     const socialFile = await processor.createSocialPreview({
       width,
       height,
-      title: options.title || this.config.appName,
-      description: options.description,
+      title: options.title, // Only add text if explicitly provided
+      description: options.description, // Only add text if explicitly provided
       template: options.template || 'gradient',
       background: this.config.backgroundColor
     });

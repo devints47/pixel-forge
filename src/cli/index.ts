@@ -215,6 +215,25 @@ async function generateSpecific(sourceImage: string, config: PixelForgeConfig, o
   const generators: GeneratorInfo[] = [];
 
   // Social media platforms
+  if (options.social) {
+    // Generate standard social media assets (Facebook, Twitter, LinkedIn, Instagram)
+    const facebookGenerator = new FacebookGenerator(sourceImage, config);
+    await facebookGenerator.generate();
+    generators.push({ name: 'Facebook', generator: facebookGenerator, files: facebookGenerator.getGeneratedFiles() });
+
+    const twitterGenerator = new TwitterGenerator(sourceImage, config);
+    await twitterGenerator.generate();
+    generators.push({ name: 'Twitter', generator: twitterGenerator, files: twitterGenerator.getGeneratedFiles() });
+
+    const linkedinGenerator = new LinkedInGenerator(sourceImage, config);
+    await linkedinGenerator.generate();
+    generators.push({ name: 'LinkedIn', generator: linkedinGenerator, files: linkedinGenerator.getGeneratedFiles() });
+
+    const instagramGenerator = new InstagramGenerator(sourceImage, config);
+    await instagramGenerator.generate({ includeStories: false, includeReels: false });
+    generators.push({ name: 'Instagram', generator: instagramGenerator, files: instagramGenerator.getGeneratedFiles() });
+  }
+
   if (options.facebook) {
     const generator = new FacebookGenerator(sourceImage, config);
     await generator.generate();
@@ -457,22 +476,18 @@ async function generateSpecific(sourceImage: string, config: PixelForgeConfig, o
   }
 
   // Category generators
-  if (options.social) {
-    const generator = new ComprehensiveSocialGenerator(sourceImage, config);
-    await generator.generate({ includeStandard: true, includeInstagram: false, includeMessaging: false, includePlatforms: false });
-    generators.push({ name: 'Social Media', generator, files: ['facebook.png', 'twitter.png', 'linkedin.png'] });
-  }
+
 
   if (options.messaging) {
     const generator = new ComprehensiveSocialGenerator(sourceImage, config);
     await generator.generate({ includeStandard: false, includeInstagram: false, includeMessaging: true, includePlatforms: false });
-    generators.push({ name: 'Messaging Apps', generator, files: ['whatsapp-profile.png', 'discord.png', 'telegram.png', 'signal.png', 'slack.png', 'imessage.png'] });
+    generators.push({ name: 'Messaging Apps', generator, files: await generator.getGeneratedFiles() });
   }
 
   if (options.platforms) {
     const generator = new ComprehensiveSocialGenerator(sourceImage, config);
     await generator.generate({ includeStandard: false, includeInstagram: false, includeMessaging: false, includePlatforms: true });
-    generators.push({ name: 'Video Platforms', generator, files: ['tiktok.png', 'youtube-thumbnail.png', 'youtube-shorts.png', 'pinterest-pin.png', 'pinterest-board.png'] });
+    generators.push({ name: 'Video Platforms', generator, files: await generator.getGeneratedFiles() });
   }
 
   if (options.favicon) {
@@ -626,7 +641,7 @@ program
   .option('-p, --prefix <path>', 'URL prefix for generated files', '/images/')
   .option('-f, --format <format>', 'Output format (png|jpeg|webp|avif|tiff|gif)', 'png')
   .option('--all', 'Generate all asset types')
-  .option('--social', 'Generate standard social media assets (Facebook, Twitter, LinkedIn)')
+  .option('--social', 'Generate standard social media assets (Facebook, Twitter, LinkedIn, Instagram)')
   .option('--facebook', 'Generate Facebook assets only')
   .option('--twitter', 'Generate Twitter assets only')
   .option('--linkedin', 'Generate LinkedIn assets only')

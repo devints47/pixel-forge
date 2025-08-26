@@ -13,6 +13,7 @@ export interface InstagramOptions {
 export class InstagramGenerator {
   private config: PixelForgeConfig;
   private sourceImage: string;
+  private generatedFiles: string[] = [];
 
   constructor(sourceImage: string, config: PixelForgeConfig) {
     this.config = config;
@@ -25,19 +26,29 @@ export class InstagramGenerator {
   async generate(options: InstagramOptions = {}): Promise<void> {
     const { includeStories = true, includeReels = true } = options;
 
+    // Reset generated files list
+    this.generatedFiles = [];
+
     // Generate feed posts
     await this.generateSquarePost(options);
+    this.generatedFiles.push('instagram-square.png');
+
     await this.generatePortraitPost(options);
+    this.generatedFiles.push('instagram-portrait.png');
+
     await this.generateLandscapePost(options);
+    this.generatedFiles.push('instagram-landscape.png');
 
     // Generate Stories if requested
     if (includeStories) {
       await this.generateStories(options);
+      this.generatedFiles.push('instagram-stories.png');
     }
 
     // Generate Reels if requested
     if (includeReels) {
       await this.generateReels(options);
+      this.generatedFiles.push('instagram-reels.png');
     }
   }
 
@@ -52,8 +63,8 @@ export class InstagramGenerator {
     const socialFile = await processor.createSocialPreview({
       width,
       height,
-      title: options.title || this.config.appName,
-      description: options.description,
+      title: options.title, // Only add text if explicitly provided
+      description: options.description, // Only add text if explicitly provided
       template: options.template,
       background: this.config.backgroundColor
     });
@@ -76,8 +87,8 @@ export class InstagramGenerator {
     const socialFile = await processor.createSocialPreview({
       width,
       height,
-      title: options.title || this.config.appName,
-      description: options.description,
+      title: options.title, // Only add text if explicitly provided
+      description: options.description, // Only add text if explicitly provided
       template: options.template,
       background: this.config.backgroundColor
     });
@@ -100,8 +111,8 @@ export class InstagramGenerator {
     const socialFile = await processor.createSocialPreview({
       width,
       height,
-      title: options.title || this.config.appName,
-      description: options.description,
+      title: options.title, // Only add text if explicitly provided
+      description: options.description, // Only add text if explicitly provided
       template: options.template,
       background: this.config.backgroundColor
     });
@@ -208,12 +219,6 @@ export class InstagramGenerator {
    * Get list of generated files
    */
   getGeneratedFiles(): string[] {
-    return [
-      'instagram-square.png',
-      'instagram-portrait.png',
-      'instagram-landscape.png',
-      'instagram-stories.png',
-      'instagram-reels.png'
-    ];
+    return [...this.generatedFiles];
   }
 } 
