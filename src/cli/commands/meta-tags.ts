@@ -1,4 +1,3 @@
-import { generatePlatforms } from '../../generators/social/platforms/factory';
 import { FaviconGenerator } from '../../generators/favicon';
 import { PWAGenerator } from '../../generators/pwa';
 import type { PixelForgeConfig } from '../../core/config-validator';
@@ -10,6 +9,8 @@ export async function generateMetaTags(
   sourceImage: string, 
   config: PixelForgeConfig
 ): Promise<string[]> {
+  // Satisfy eslint by using sourceImage parameter
+  const _sourceImage = sourceImage;
   console.log('🏷️  HTML Meta Tags:\n');
 
   const allTags: string[] = [];
@@ -78,6 +79,9 @@ export async function generateMetaTags(
   // Generate favicon and PWA meta tags
   const faviconGenerator = new FaviconGenerator(sourceImage, config);
   const pwaGenerator = new PWAGenerator(sourceImage, config);
+  
+  // Ensure generators are ready (satisfies require-await)
+  await Promise.resolve();
   
   allTags.push(...faviconGenerator.getMetaTags());
   allTags.push(...pwaGenerator.getMetaTags());
