@@ -217,22 +217,26 @@ async function generateSpecific(sourceImage: string, config: PixelForgeConfig, o
 
   // Social media platforms
   if (options.social) {
-    // Generate standard social media assets (Facebook, Twitter, LinkedIn, Instagram, Snapchat)
+    // Generate comprehensive social media assets (Facebook, Twitter, LinkedIn, Instagram, TikTok, Snapchat)
     const facebookGenerator = new FacebookGenerator(sourceImage, config);
-    await facebookGenerator.generate();
+    await facebookGenerator.generate({ includeStandard: true, includeSquare: true });
     generators.push({ name: 'Facebook', generator: facebookGenerator, files: facebookGenerator.getGeneratedFiles() });
 
     const twitterGenerator = new TwitterGenerator(sourceImage, config);
-    await twitterGenerator.generate();
+    await twitterGenerator.generate({ includeStandard: true, includeSquare: true });
     generators.push({ name: 'Twitter', generator: twitterGenerator, files: twitterGenerator.getGeneratedFiles() });
 
     const linkedinGenerator = new LinkedInGenerator(sourceImage, config);
-    await linkedinGenerator.generate();
+    await linkedinGenerator.generate({ includeStandard: true, includeCompany: true });
     generators.push({ name: 'LinkedIn', generator: linkedinGenerator, files: linkedinGenerator.getGeneratedFiles() });
 
     const instagramGenerator = new InstagramGenerator(sourceImage, config);
-    await instagramGenerator.generate({ includeStories: false, includeReels: false });
+    await instagramGenerator.generate({ includeStories: true, includeReels: true });
     generators.push({ name: 'Instagram', generator: instagramGenerator, files: instagramGenerator.getGeneratedFiles() });
+
+    const tiktokGenerator = new TikTokGenerator(sourceImage, config);
+    await tiktokGenerator.generate({ includeVertical: true, includeProfile: true });
+    generators.push({ name: 'TikTok', generator: tiktokGenerator, files: tiktokGenerator.getGeneratedFiles() });
 
     // Add Snapchat via PlatformGenerator
     const platformGenerator = new ComprehensiveSocialGenerator(sourceImage, config);
@@ -665,7 +669,7 @@ program
   .option('-p, --prefix <path>', 'URL prefix for generated files', '/images/')
   .option('-f, --format <format>', 'Output format (png|jpeg|webp|avif|tiff|gif)', 'png')
   .option('--all', 'Generate all asset types')
-  .option('--social', 'Generate standard social media assets (Facebook, Twitter, LinkedIn, Instagram, Snapchat)')
+  .option('--social', 'Generate standard social media assets (Facebook, Twitter, LinkedIn, Instagram, TikTok, Snapchat)')
   .option('--facebook', 'Generate Facebook assets only')
   .option('--twitter', 'Generate Twitter assets only')
   .option('--linkedin', 'Generate LinkedIn assets only')

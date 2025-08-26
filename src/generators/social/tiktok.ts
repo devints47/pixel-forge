@@ -13,6 +13,7 @@ export interface TikTokOptions {
 export class TikTokGenerator {
   private config: PixelForgeConfig;
   private sourceImage: string;
+  private generatedFiles: string[] = [];
 
   constructor(sourceImage: string, config: PixelForgeConfig) {
     this.config = config;
@@ -31,12 +32,17 @@ export class TikTokGenerator {
       template = 'basic'
     } = options;
 
+    // Reset generated files list
+    this.generatedFiles = [];
+
     if (includeVertical) {
       await this.generateVerticalImage(title, description, template);
+      this.generatedFiles.push('tiktok.png');
     }
 
     if (includeProfile) {
       await this.generateProfileImage(title, description, template);
+      this.generatedFiles.push('tiktok-profile.png');
     }
   }
 
@@ -171,6 +177,6 @@ export class TikTokGenerator {
    * Get list of generated files
    */
   getGeneratedFiles(): string[] {
-    return ['tiktok.png', 'tiktok-profile.png'];
+    return [...this.generatedFiles];
   }
 } 
