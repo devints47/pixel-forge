@@ -86,6 +86,7 @@ interface CLIOptions {
   signal?: boolean;
   slack?: boolean;
   androidrcs?: boolean;
+  snapchat?: boolean;
   threads?: boolean;
   bluesky?: boolean;
   mastodon?: boolean;
@@ -216,7 +217,7 @@ async function generateSpecific(sourceImage: string, config: PixelForgeConfig, o
 
   // Social media platforms
   if (options.social) {
-    // Generate standard social media assets (Facebook, Twitter, LinkedIn, Instagram)
+    // Generate standard social media assets (Facebook, Twitter, LinkedIn, Instagram, Snapchat)
     const facebookGenerator = new FacebookGenerator(sourceImage, config);
     await facebookGenerator.generate();
     generators.push({ name: 'Facebook', generator: facebookGenerator, files: facebookGenerator.getGeneratedFiles() });
@@ -232,6 +233,17 @@ async function generateSpecific(sourceImage: string, config: PixelForgeConfig, o
     const instagramGenerator = new InstagramGenerator(sourceImage, config);
     await instagramGenerator.generate({ includeStories: false, includeReels: false });
     generators.push({ name: 'Instagram', generator: instagramGenerator, files: instagramGenerator.getGeneratedFiles() });
+
+    // Add Snapchat via PlatformGenerator
+    const platformGenerator = new ComprehensiveSocialGenerator(sourceImage, config);
+    await platformGenerator.generate({ 
+      includeStandard: false, 
+      includeInstagram: false, 
+      includeMessaging: false, 
+      includePlatforms: true,
+      platforms: { snapchat: true, tiktok: false, youtube: false, pinterest: false, threads: false, bluesky: false, mastodon: false }
+    });
+    generators.push({ name: 'Snapchat', generator: platformGenerator, files: ['snapchat.png'] });
   }
 
   if (options.facebook) {
@@ -256,6 +268,18 @@ async function generateSpecific(sourceImage: string, config: PixelForgeConfig, o
     const generator = new InstagramGenerator(sourceImage, config);
     await generator.generate({ includeStories: false, includeReels: false }); // Avoid text overlay issues
     generators.push({ name: 'Instagram', generator, files: generator.getGeneratedFiles() });
+  }
+
+  if (options.snapchat) {
+    const generator = new ComprehensiveSocialGenerator(sourceImage, config);
+    await generator.generate({ 
+      includeStandard: false, 
+      includeInstagram: false, 
+      includeMessaging: false, 
+      includePlatforms: true,
+      platforms: { snapchat: true, tiktok: false, youtube: false, pinterest: false, threads: false, bluesky: false, mastodon: false }
+    });
+    generators.push({ name: 'Snapchat', generator, files: ['snapchat.png'] });
   }
 
   if (options.tiktok) {
@@ -641,7 +665,7 @@ program
   .option('-p, --prefix <path>', 'URL prefix for generated files', '/images/')
   .option('-f, --format <format>', 'Output format (png|jpeg|webp|avif|tiff|gif)', 'png')
   .option('--all', 'Generate all asset types')
-  .option('--social', 'Generate standard social media assets (Facebook, Twitter, LinkedIn, Instagram)')
+  .option('--social', 'Generate standard social media assets (Facebook, Twitter, LinkedIn, Instagram, Snapchat)')
   .option('--facebook', 'Generate Facebook assets only')
   .option('--twitter', 'Generate Twitter assets only')
   .option('--linkedin', 'Generate LinkedIn assets only')
@@ -656,6 +680,7 @@ program
   .option('--signal', 'Generate Signal assets only')
   .option('--slack', 'Generate Slack assets only')
   .option('--androidrcs', 'Generate Android RCS assets only')
+  .option('--snapchat', 'Generate Snapchat assets only')
   .option('--threads', 'Generate Threads assets only')
   .option('--bluesky', 'Generate Bluesky assets only')
   .option('--mastodon', 'Generate Mastodon assets only')
@@ -703,7 +728,7 @@ program
       } else if (options.facebook || options.twitter || options.linkedin || options.instagram || 
                  options.tiktok || options.whatsapp || options.youtube || options.pinterest ||
                  options.imessage || options.discord || options.telegram || options.signal ||
-                 options.slack || options.androidrcs || options.threads || options.bluesky ||
+                 options.slack || options.androidrcs || options.snapchat || options.threads || options.bluesky ||
                  options.mastodon || options.social || options.messaging || 
                  options.platforms || options.favicon || options.pwa || options.seo || options.web) {
         await generateSpecific(sourcePath, config, options);
