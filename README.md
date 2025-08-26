@@ -12,7 +12,7 @@
   [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 </div>
 
-Pixel Forge is a reliable TypeScript package that generates optimized images for social media previews, favicons, SEO metadata, and PWA assets across **all major platforms** - from Facebook and Instagram to TikTok, WhatsApp, Discord, to iMessage, SMS, RCS, and more.
+Pixel Forge is a reliable TypeScript package that generates optimized **OpenGraph images for website sharing** across social media and messaging platforms, plus complete favicon, SEO, and PWA asset generation. Supporting Facebook, Twitter, LinkedIn, Instagram, TikTok, Snapchat, Discord, Telegram, Signal, Slack, Threads, WhatsApp, and more.
 
 **Built with ImageMagick for rock-solid reliability across all environments.**
 
@@ -106,13 +106,14 @@ await generateAll(config);
 
 ## ✨ Why Pixel Forge?
 
-- 🌍 **Complete Web Coverage** - Generates everything from favicons to social sharing images
-- 📱 **Modern Standards** - Supports PWA, OpenGraph, Twitter Cards, Apple Touch Icons, and more
+- 🌍 **OpenGraph Focus** - Perfect images for when websites are shared on social platforms
+- 📱 **Complete Web Coverage** - Favicons, PWA assets, SEO images in one command
 - 🔧 **ImageMagick Powered** - Battle-tested image processing with superior reliability
 - ⚡ **Framework Agnostic** - Works with any framework, includes Next.js helpers
-- 🎯 **Developer-First** - One command generates everything you need for SEO and social sharing
+- 🎯 **Developer-First** - Generate everything you need for proper website sharing
 - 🔧 **TypeScript First** - Full type safety and IntelliSense support
 - 💪 **Production Ready** - Reliable across all platforms and environments
+- 🚀 **11 Platforms** - Facebook, Twitter, LinkedIn, Instagram, TikTok, Snapchat, Discord, Telegram, Signal, Slack, Threads
 
 ## 🌟 Key Features
 
@@ -131,38 +132,21 @@ await generateAll(config);
 - ✅ **Safari Support** - Pinned tab SVG, Apple-specific optimizations
 - ✅ **Microsoft Support** - Windows tiles, Edge/IE compatibility
 
-### Major Social Networks
-- ✅ **Facebook** (1200x630) - OpenGraph optimized
-- ✅ **Twitter/X** (1200x600) - Twitter Cards support
-- ✅ **LinkedIn** (1200x627) - Professional networking
-- ✅ **Instagram** - Multiple formats:
-  - Square (1080x1080) - Standard posts
-  - Portrait (1080x1350) - Vertical posts
-  - Stories (1080x1920) - 24hr stories
-  - Reels (1080x1920) - Video content
-- ✅ **TikTok** (1080x1920) - Vertical video format
-- ✅ **YouTube**:
-  - Thumbnails (1280x720) - Video previews
-  - Shorts (1080x1920) - Short content
-- ✅ **Pinterest**:
-  - Pin (1000x1500) - Pin boards
-  - Square (1000x1000) - Square pins
+### Social Media Platforms
+- ✅ **Facebook** (1200x630 + 1200x1200) - OpenGraph optimized link sharing
+- ✅ **Twitter/X** (1200x600 + 1200x1200) - Twitter Cards support
+- ✅ **LinkedIn** (1200x627 + 1104x736) - Professional networking
+- ✅ **Instagram** (1200x630) - Website link sharing
+- ✅ **TikTok** (1200x630) - Website link sharing
+- ✅ **Snapchat** (1200x630) - Website link sharing
+- ✅ **Threads** (1200x1200) - Meta's Twitter alternative
 
 ### Messaging Applications
-- ✅ **WhatsApp**:
-  - Profile (400x400) - Profile images
-  - Link Preview (1200x630) - Link sharing
-- ✅ **Discord** (1200x630) - Server sharing
-- ✅ **Telegram** (1200x630) - Message sharing
-- ✅ **Signal** (1200x630) - Secure sharing
-- ✅ **Slack** (1200x630) - Workspace sharing
-- ✅ **iMessage** (1200x630) - iOS sharing
-- ✅ **Android RCS** (1200x630) - Android sharing
-
-### Emerging Platforms
-- ✅ **Threads** (1080x1080) - Meta's Twitter alternative
-- ✅ **Bluesky** (1200x630) - Decentralized social network
-- ✅ **Mastodon** (1200x630) - Federated social media
+- ✅ **WhatsApp** (1200x630) - Link sharing previews
+- ✅ **Discord** (1200x630) - Server link sharing
+- ✅ **Telegram** (1200x630) - Message link sharing
+- ✅ **Signal** (1200x630) - Secure link sharing
+- ✅ **Slack** (1200x630) - Workspace link sharing
 
 ## 🚀 Quick Start
 
@@ -187,20 +171,30 @@ npx pixel-forge generate logo.png --pwa      # PWA icons & manifest
 npx pixel-forge generate logo.png --web --format both
 ```
 
-**Files generated for `--web`:**
+**Key files generated for `--web` (65 total):**
 ```
 public/images/
+# Core OpenGraph Images (6 files)
 ├── og-image.png              # Generic OpenGraph (1200x630)
+├── opengraph.png             # Standard OpenGraph (1200x630)  
 ├── twitter-image.png         # Twitter card (1200x600)
+
+# Essential Favicons (20 files)
 ├── favicon.ico               # Multi-size ICO
-├── favicon-16x16.png         # Browser favicons
-├── favicon-32x32.png
-├── apple-touch-icon.png      # iOS home screen (180x180)
-├── android-chrome-192x192.png # PWA icons
-├── android-chrome-512x512.png
-├── safari-pinned-tab.svg     # Safari pinned tabs
+├── favicon.png               # PNG fallback
+├── favicon.svg               # Vector favicon
+├── favicon-16x16.png         # Browser tab
+├── favicon-32x32.png         # Address bar
+├── apple-icon-180x180.png    # iOS home screen
+└── ... 14 more favicon sizes
+
+# PWA Assets (39 files)  
+├── android-chrome-192x192.png # PWA icon
+├── android-chrome-512x512.png # PWA icon
 ├── manifest.json             # PWA manifest
-└── browserconfig.xml         # Microsoft Edge/IE
+├── pwa-*.png                 # App icons (8 files)
+├── splash-*.png              # iOS splash screens (30 files)
+└── browserconfig.xml         # Microsoft config
 ```
 
 ### HTML Integration
@@ -208,18 +202,20 @@ public/images/
 The generated images work seamlessly with your HTML:
 
 ```html
+<!-- Essential OpenGraph (works everywhere) -->
+<meta property="og:image" content="/images/og-image.png">
+<meta property="og:image" content="/images/opengraph.png"> 
+<meta name="twitter:image" content="/images/twitter-image.png">
+
 <!-- Favicons -->
 <link rel="icon" href="/images/favicon.ico" sizes="any">
 <link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
+<link rel="icon" href="/images/favicon-16x16.png" sizes="16x16">
+<link rel="icon" href="/images/favicon-32x32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="/images/apple-icon-180x180.png">
+
+<!-- PWA -->
 <link rel="manifest" href="/images/manifest.json">
-
-<!-- SEO & Social Sharing -->
-<meta property="og:image" content="/images/og-image.png">
-<meta name="twitter:image" content="/images/twitter-image.png">
-
-<!-- Safari & Microsoft -->
-<link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#000000">
 <meta name="msapplication-config" content="/images/browserconfig.xml">
 ```
 
@@ -239,11 +235,11 @@ export const metadata: Metadata = {
       { url: '/images/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
     ],
     apple: [
-      { url: '/images/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+      { url: '/images/apple-icon-180x180.png', sizes: '180x180', type: 'image/png' },
     ],
   },
   openGraph: {
-    images: ['/images/og-image.png'],
+    images: ['/images/og-image.png', '/images/opengraph.png'],
   },
   twitter: {
     card: 'summary_large_image',
@@ -257,33 +253,26 @@ export const metadata: Metadata = {
 
 Generate assets for specific platforms:
 ```bash
-# Major Social Networks
-npx pixel-forge generate logo.png --facebook    # Facebook (1200x630)
-npx pixel-forge generate logo.png --twitter     # Twitter/X (1200x600)
-npx pixel-forge generate logo.png --linkedin    # LinkedIn (1200x627)
-npx pixel-forge generate logo.png --instagram   # Instagram (all formats)
-npx pixel-forge generate logo.png --tiktok      # TikTok (1080x1920)
-npx pixel-forge generate logo.png --youtube     # YouTube (thumbnail + shorts)
-npx pixel-forge generate logo.png --pinterest   # Pinterest (pin + square)
+# Major Social Networks  
+npx pixel-forge generate logo.png --facebook    # Facebook (1200x630 + 1200x1200)
+npx pixel-forge generate logo.png --twitter     # Twitter/X (1200x600 + 1200x1200)
+npx pixel-forge generate logo.png --linkedin    # LinkedIn (1200x627 + 1104x736)
+npx pixel-forge generate logo.png --instagram   # Instagram (1200x630)
+npx pixel-forge generate logo.png --tiktok      # TikTok (1200x630)
+npx pixel-forge generate logo.png --snapchat    # Snapchat (1200x630)
+npx pixel-forge generate logo.png --threads     # Threads (1200x1200)
 
 # Messaging Apps
-npx pixel-forge generate logo.png --whatsapp    # WhatsApp (profile + preview)
+npx pixel-forge generate logo.png --whatsapp    # WhatsApp (1200x630)
 npx pixel-forge generate logo.png --discord     # Discord (1200x630)
 npx pixel-forge generate logo.png --telegram    # Telegram (1200x630)
 npx pixel-forge generate logo.png --signal      # Signal (1200x630)
 npx pixel-forge generate logo.png --slack       # Slack (1200x630)
-npx pixel-forge generate logo.png --imessage    # iMessage (1200x630)
-npx pixel-forge generate logo.png --androidrcs  # Android RCS (1200x630)
-
-# Emerging Platforms
-npx pixel-forge generate logo.png --threads     # Threads (1080x1080)
-npx pixel-forge generate logo.png --bluesky     # Bluesky (1200x630)
-npx pixel-forge generate logo.png --mastodon    # Mastodon (1200x630)
 
 # Platform Categories
-npx pixel-forge generate logo.png --social      # Standard social (FB, Twitter, LinkedIn)
+npx pixel-forge generate logo.png --social      # All social platforms (11 platforms)
 npx pixel-forge generate logo.png --messaging   # All messaging platforms
-npx pixel-forge generate logo.png --platforms   # All video/visual platforms
+npx pixel-forge generate logo.png --web         # Favicon + PWA + SEO
 
 # Generate everything
 npx pixel-forge generate logo.png --all
@@ -358,33 +347,35 @@ import {
   TwitterGenerator, 
   LinkedInGenerator, 
   InstagramGenerator,
-  TikTokGenerator, 
+  TikTokGenerator,
+  SnapchatGenerator,
+  DiscordGenerator,
+  TelegramGenerator,
+  SignalGenerator,
+  SlackGenerator,
+  ThreadsGenerator,
   WhatsAppGenerator 
 } from 'pixel-forge';
 
-// Facebook only
+// Social Media Platforms
 const facebook = new FacebookGenerator('./logo.png', config);
-await facebook.generate();
+await facebook.generate(); // facebook-og.png + facebook-square.png
 
-// Twitter only
 const twitter = new TwitterGenerator('./logo.png', config);
-await twitter.generate();
+await twitter.generate(); // twitter-card.png + twitter-square.png
 
-// LinkedIn only
-const linkedin = new LinkedInGenerator('./logo.png', config);
-await linkedin.generate();
-
-// Instagram only
 const instagram = new InstagramGenerator('./logo.png', config);
-await instagram.generate({ includeStories: true, includeReels: true });
+await instagram.generate(); // instagram.png
 
-// TikTok only
 const tiktok = new TikTokGenerator('./logo.png', config);
-await tiktok.generate();
+await tiktok.generate(); // tiktok.png
 
-// WhatsApp only
-const whatsapp = new WhatsAppGenerator('./logo.png', config);
-await whatsapp.generate();
+// Messaging Platforms
+const discord = new DiscordGenerator('./logo.png', config);
+await discord.generate(); // discord.png
+
+const telegram = new TelegramGenerator('./logo.png', config);
+await telegram.generate(); // telegram.png
 ```
 
 ### Framework Integration
@@ -414,33 +405,54 @@ metaTags.forEach(tag => {
 });
 ```
 
-## 📋 Complete Platform Matrix
+## 📋 Platform Matrices by Flag
 
-| Platform | Format | Size | Use Case |
-|----------|--------|------|----------|
-| **Facebook** | OpenGraph | 1200x630 | Link sharing, posts |
-| **Twitter/X** | Twitter Card | 1200x600 | Tweet attachments |
-| **LinkedIn** | Business | 1200x627 | Professional sharing |
-| **Instagram Square** | Feed Post | 1080x1080 | Standard posts |
-| **Instagram Portrait** | Feed Post | 1080x1350 | Vertical posts |
-| **Instagram Stories** | Stories | 1080x1920 | 24hr stories |
-| **Instagram Reels** | Short Video | 1080x1920 | Video content |
-| **TikTok** | Vertical | 1080x1920 | Short videos |
-| **YouTube Thumbnail** | Video | 1280x720 | Video previews |
-| **YouTube Shorts** | Vertical | 1080x1920 | Short content |
-| **Pinterest Pin** | Vertical | 1000x1500 | Pin boards |
-| **Pinterest Square** | Square | 1000x1000 | Square pins |
-| **WhatsApp Profile** | Square | 400x400 | Profile images |
-| **WhatsApp Link** | Preview | 1200x630 | Link sharing |
-| **Discord** | Embed | 1200x630 | Server sharing |
-| **Telegram** | Link Preview | 1200x630 | Message sharing |
-| **Signal** | Preview | 1200x630 | Secure sharing |
-| **Slack** | Unfurl | 1200x630 | Workspace sharing |
-| **iMessage** | Rich Link | 1200x630 | iOS sharing |
-| **Android RCS** | Rich Message | 1200x630 | Android sharing |
-| **Threads** | Post | 1080x1080 | Meta platform |
-| **Bluesky** | Post | 1200x630 | Decentralized |
-| **Mastodon** | Toot | 1200x630 | Federated |
+### 🌐 Core Web Assets (`--web` flag)
+
+**Essential OpenGraph images for any website:**
+
+| Asset | Format | Size | Use Case | Files |
+|-------|--------|------|----------|-------|
+| **Generic OpenGraph** | PNG/JPEG | 1200x630 | Universal social sharing | `og-image.png`, `og-image.jpg` |
+| **OpenGraph Standard** | PNG/JPEG | 1200x630 | Standard meta property | `opengraph.png`, `opengraph.jpg` |
+| **Twitter Cards** | PNG/JPEG | 1200x600 | Twitter-specific sharing | `twitter-image.png`, `twitter-image.jpg` |
+
+*Plus complete favicon (20 files) and PWA assets (39 files) - see below for details.*
+
+### 📱 Social Media Platforms (`--social` flag)
+
+**Platform-specific OpenGraph images for optimal sharing:**
+
+| Platform | Format | Size | Use Case | Files |
+|----------|--------|------|----------|-------|
+| **Facebook** | OpenGraph + Square | 1200x630 + 1200x1200 | Link sharing, posts | `facebook-og.png`, `facebook-square.png` |
+| **Twitter/X** | Twitter Card + Square | 1200x600 + 1200x1200 | Tweet previews | `twitter-card.png`, `twitter-square.png` |
+| **LinkedIn** | Share + Company | 1200x627 + 1104x736 | Professional sharing | `linkedin-share.png`, `linkedin-company.png` |
+| **Instagram** | OpenGraph | 1200x630 | Website link sharing | `instagram.png` |
+| **TikTok** | OpenGraph | 1200x630 | Website link sharing | `tiktok.png` |
+| **Snapchat** | OpenGraph | 1200x630 | Website link sharing | `snapchat.png` |
+| **Discord** | Embed | 1200x630 | Server link sharing | `discord.png` |
+| **Telegram** | Link Preview | 1200x630 | Message link sharing | `telegram.png` |
+| **Signal** | Link Preview | 1200x630 | Secure link sharing | `signal.png` |
+| **Slack** | Link Unfurl | 1200x630 | Workspace link sharing | `slack.png` |
+| **Threads** | Post Preview | 1200x1200 | Meta platform sharing | `threads.png` |
+
+### 🎯 Favicon Assets (`--favicon` flag)
+
+| Asset | Format | Sizes | Use Case | Count |
+|-------|--------|-------|----------|-------|
+| **Browser Icons** | ICO, PNG | 16x16, 32x32, 48x48 | Browser tabs, bookmarks | 8 files |
+| **Apple Touch Icons** | PNG | 57x57 to 180x180 | iOS home screen, Safari | 6 files |
+| **Android Icons** | PNG | 36x36 to 192x192 | Android browsers, PWA | 4 files |
+| **Windows Tiles** | PNG, XML | 70x70 to 310x310 | Windows Start Menu | 2 files |
+
+### 📱 PWA Assets (`--pwa` flag)
+
+| Asset | Format | Sizes | Use Case | Count |
+|-------|--------|-------|----------|-------|
+| **App Icons** | PNG | 72x72 to 512x512 | Progressive Web App | 8 files |
+| **Splash Screens** | PNG | Device-specific | iOS app launch screens | 30 files |
+| **Manifest** | JSON | - | PWA configuration | 1 file |
 
 ## 🎨 Templates & Customization
 
