@@ -137,7 +137,7 @@ export class InstagramGenerator {
       height,
       title: options.title || this.config.appName,
       description: options.description,
-      template: options.template || 'gradient',
+      template: options.template || 'basic',
       background: this.config.backgroundColor
     });
     const finalProcessor = new ImageProcessor(socialFile);
@@ -161,7 +161,7 @@ export class InstagramGenerator {
       height,
       title: options.title || this.config.appName,
       description: options.description,
-      template: options.template || 'gradient',
+      template: options.template || 'basic',
       background: this.config.backgroundColor
     });
     const finalProcessor = new ImageProcessor(socialFile);
