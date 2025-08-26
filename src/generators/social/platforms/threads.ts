@@ -1,5 +1,5 @@
-import { SquareOpenGraphGenerator } from './square-opengraph';
-import type { PixelForgeConfig } from '../../core/config-validator';
+import { SquareOpenGraphGenerator } from '../square-opengraph';
+import type { PixelForgeConfig } from '../../../core/config-validator';
 
 export interface ThreadsOptions {
   title?: string;

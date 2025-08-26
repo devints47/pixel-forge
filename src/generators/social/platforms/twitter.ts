@@ -1,6 +1,6 @@
-import { BaseOpenGraphGenerator } from './base-opengraph';
-import { ImageSizes } from '../../core/image-processor';
-import type { PixelForgeConfig } from '../../core/config-validator';
+import { BaseOpenGraphGenerator } from '../base-opengraph';
+import { ImageSizes } from '../../../core/image-processor';
+import type { PixelForgeConfig } from '../../../core/config-validator';
 
 export interface TwitterOptions {
   title?: string;

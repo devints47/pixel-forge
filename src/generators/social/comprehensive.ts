@@ -1,5 +1,5 @@
 import { OpenGraphGenerator } from './opengraph';
-import { InstagramGenerator } from './instagram';
+import { InstagramGenerator } from './platforms/instagram';
 import { MessagingGenerator } from './messaging';
 import { PlatformGenerator } from './platforms';
 import type { PixelForgeConfig } from '../../core/config-validator';
@@ -209,46 +209,23 @@ export class ComprehensiveSocialGenerator {
   }
 
   /**
-   * Get generated file summary
+   * Get generated file summary by scanning the actual output directory
    */
   async getGeneratedFiles(): Promise<string[]> {
-    // This would return a list of all generated files
-    // Implementation would scan the output directory
-    return [
-      // Standard social
-      'facebook.png',
-      'twitter.png',
-      'linkedin.png',
-      
-      // Instagram
-      'instagram-square.png',
-      'instagram-portrait.png',
-      'instagram-landscape.png',
-      'instagram-stories.png',
-      'instagram-reels.png',
-      
-      // Messaging
-      'messaging-standard.png',
-      'whatsapp-square.png',
-      'whatsapp-link.png',
-      'discord.png',
-      'telegram.png',
-      'signal.png',
-      'slack.png',
-      'imessage.png',
-      'android-rcs.png',
-      'wechat.png',
-      
-      // Platforms
-      'tiktok.png',
-      'youtube-thumbnail.png',
-      'youtube-shorts.png',
-      'pinterest-pin.png',
-      'pinterest-square.png',
-      'snapchat.png',
-      'threads.png',
-      'bluesky.png',
-      'mastodon.png'
-    ];
+    try {
+      const fs = await import('fs/promises');
+      const files = await fs.readdir(this.config.output.path);
+      // Filter for image files that were actually generated
+      return files.filter(file => 
+        file.endsWith('.png') || 
+        file.endsWith('.jpg') || 
+        file.endsWith('.jpeg') || 
+        file.endsWith('.webp') ||
+        file.endsWith('.svg')
+      );
+    } catch (error) {
+      // If directory doesn't exist or can't be read, return empty array
+      return [];
+    }
   }
 } 

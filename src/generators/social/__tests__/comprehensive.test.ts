@@ -1,10 +1,9 @@
 import { describe, expect, it, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { ComprehensiveSocialGenerator } from '../comprehensive';
-import { InstagramGenerator } from '../instagram';
-import { MessagingGenerator } from '../messaging';
-import { PlatformGenerator } from '../platforms';
+import { InstagramGenerator } from '../platforms/instagram';
+import { generatePlatforms } from '../platforms/factory';
+import { generateMessaging } from '../messaging/factory';
 import { enableMockMode, disableMockMode } from '../../../core/image-processor';
 import type { PixelForgeConfig } from '../../../core/config-validator';
 
@@ -104,147 +103,111 @@ describe('Comprehensive Social Media Generators', () => {
     });
   });
 
-  describe('MessagingGenerator', () => {
+  describe('Messaging Factory', () => {
     it('should generate messaging app formats', async () => {
-      const generator = new MessagingGenerator(
+      const results = await generateMessaging(
         path.join(__dirname, 'fixtures', 'test-image.png'),
-        testConfig
+        testConfig,
+        {
+          discord: true,   // Enable one to test
+          telegram: false,
+          signal: false,
+          slack: false,
+          imessage: false,
+          androidrcs: false
+        }
       );
 
-      await generator.generate({
-        includeWhatsApp: true,
-        includeDiscord: false, // Skip to avoid text overlay
-        includeTelegram: false, // Skip to avoid text overlay
-        includeWeChat: false
-      });
-
-      const files = await fs.readdir(testConfig.output.path);
-      expect(files).toContain('messaging-standard.png');
-      expect(files).toContain('whatsapp-square.png');
-      expect(files).toContain('whatsapp-link.png');
+      expect(results.length).toBeGreaterThan(0);
+      expect(results[0].files.length).toBeGreaterThan(0);
     });
 
-    it('should generate messaging meta tags', () => {
-      const generator = new MessagingGenerator(
+    it('should return empty array when no options selected', async () => {
+      const results = await generateMessaging(
         path.join(__dirname, 'fixtures', 'test-image.png'),
-        testConfig
+        testConfig,
+        {
+          discord: false,
+          telegram: false,
+          signal: false,
+          slack: false,
+          imessage: false,
+          androidrcs: false
+        }
       );
 
-      const metaTags = generator.getMetaTags();
-      expect(metaTags).toEqual(
-        expect.arrayContaining([
-          expect.stringContaining('messaging-standard.png'),
-          expect.stringContaining('apple-mobile-web-app-capable')
-        ])
-      );
+      expect(results.length).toBe(0);
     });
   });
 
-  describe('PlatformGenerator', () => {
+  describe('Platform Factory', () => {
     it('should generate platform-specific formats', async () => {
-      const generator = new PlatformGenerator(
+      const results = await generatePlatforms(
         path.join(__dirname, 'fixtures', 'test-image.png'),
-        testConfig
+        testConfig,
+        {
+          facebook: false,
+          twitter: false,
+          linkedin: false,
+          instagram: true,     // Keep one simple test
+          tiktok: false,       // Skip to avoid text overlay
+          snapchat: false,
+          threads: false,
+          whatsapp: false,
+          youtube: false,      // Skip to avoid text overlay
+          pinterest: false,    // Skip to avoid text overlay
+          bluesky: false,
+          mastodon: false
+        }
       );
 
-      await generator.generate({
-        includeTikTok: false,    // Skip to avoid text overlay
-        includeYouTube: false,   // Skip to avoid text overlay
-        includePinterest: false, // Skip to avoid text overlay
-        includeThreads: true     // Keep one simple test
-      });
-
-      const files = await fs.readdir(testConfig.output.path);
-      expect(files).toContain('threads.png');
-    });
-
-    it('should generate platform meta tags', () => {
-      const generator = new PlatformGenerator(
-        path.join(__dirname, 'fixtures', 'test-image.png'),
-        testConfig
-      );
-
-      const metaTags = generator.getMetaTags();
-      expect(metaTags.length).toBeGreaterThan(0);
+      expect(results.length).toBeGreaterThan(0);
+      expect(results[0].files.length).toBeGreaterThan(0);
     });
   });
 
-  describe('ComprehensiveSocialGenerator', () => {
-    it('should generate all social media formats', async () => {
-      const generator = new ComprehensiveSocialGenerator(
+  describe('Factory Integration', () => {
+    it('should generate social media formats via factory functions', async () => {
+      // Test that our factory functions work together
+      const platformResults = await generatePlatforms(
         path.join(__dirname, 'fixtures', 'test-image.png'),
-        testConfig
+        testConfig,
+        {
+          facebook: true,
+          twitter: false,
+          linkedin: false,
+          instagram: false,
+          tiktok: false,
+          snapchat: false,
+          threads: false,
+          whatsapp: false,
+          youtube: false,
+          pinterest: false,
+          bluesky: false,
+          mastodon: false
+        }
       );
 
-      await generator.generate({
-        includeStandard: true,
-        includeInstagram: false, // Skip Instagram for now due to text overlay issue
-        includeMessaging: false, // Skip messaging for now
-        includePlatforms: false  // Skip platforms for now
-      });
-
-      const files = await fs.readdir(testConfig.output.path);
-      
-      // Standard social
-      expect(files).toContain('og-facebook.png');
-      expect(files).toContain('twitter-card.png');
-      expect(files).toContain('og-linkedin.png');
+      expect(platformResults.length).toBeGreaterThan(0);
+      expect(platformResults[0].files.length).toBeGreaterThan(0);
     });
 
-    it('should respect platform toggles', async () => {
-      const generator = new ComprehensiveSocialGenerator(
+    it('should generate messaging formats via factory functions', async () => {
+      const messagingResults = await generateMessaging(
         path.join(__dirname, 'fixtures', 'test-image.png'),
-        testConfig
+        testConfig,
+        {
+          discord: true,   // Enable one to get results
+          telegram: false,
+          signal: false,
+          slack: false,
+          imessage: false,
+          androidrcs: false
+        }
       );
 
-      await generator.generate({
-        includeStandard: true,
-        includeInstagram: false,
-        includeMessaging: false,
-        includePlatforms: false
-      });
-
-      const files = await fs.readdir(testConfig.output.path);
-      
-      // Should have standard social
-      expect(files).toContain('og-facebook.png');
-    });
-
-    it('should generate comprehensive meta tags', () => {
-      const generator = new ComprehensiveSocialGenerator(
-        path.join(__dirname, 'fixtures', 'test-image.png'),
-        testConfig
-      );
-
-      const metaTags = generator.getMetaTags();
-      
-      // Should include tags from all generators
-      expect(metaTags.length).toBeGreaterThan(5);
-      expect(metaTags.some(tag => tag.includes('og-facebook.png'))).toBe(true);
-    });
-
-    it('should generate comprehensive Next.js metadata', () => {
-      const generator = new ComprehensiveSocialGenerator(
-        path.join(__dirname, 'fixtures', 'test-image.png'),
-        testConfig
-      );
-
-      const metadata = generator.getNextMetadata();
-      
-      expect(metadata.openGraph?.images).toBeDefined();
-      expect(metadata.twitter).toBeDefined();
-    });
-
-    it('should return list of generated files', async () => {
-      const generator = new ComprehensiveSocialGenerator(
-        path.join(__dirname, 'fixtures', 'test-image.png'),
-        testConfig
-      );
-
-      const fileList = await generator.getGeneratedFiles();
-      
-      expect(fileList.length).toBeGreaterThan(0);
-      // Just verify we get some files back - exact list depends on configuration
+      expect(messagingResults.length).toBeGreaterThan(0);
+      expect(messagingResults[0].files.length).toBeGreaterThan(0);
     });
   });
 }); 

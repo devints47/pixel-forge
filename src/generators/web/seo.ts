@@ -15,6 +15,7 @@ export interface WebSEOOptions {
 export class WebSEOGenerator {
   private config: PixelForgeConfig;
   private sourceImage: string;
+  private outputFormat: 'png' | 'jpeg' | 'both' = 'both';
 
   constructor(sourceImage: string, config: PixelForgeConfig) {
     this.config = config;
@@ -35,6 +36,9 @@ export class WebSEOGenerator {
       includeGeneric = true,
       outputFormat = 'both'
     } = options;
+
+    // Store the format used for accurate file counting
+    this.outputFormat = outputFormat;
 
     // Generate generic OpenGraph image (works everywhere)
     if (includeGeneric) {
@@ -240,17 +244,16 @@ export class WebSEOGenerator {
   }
 
   /**
-   * Get list of generated files
+   * Get list of generated files based on the format used during generation
    */
-  getGeneratedFiles(options: { format?: 'png' | 'jpeg' | 'both' } = {}): string[] {
-    const { format = 'both' } = options;
+  getGeneratedFiles(): string[] {
     const files: string[] = [];
 
-    if (format === 'png' || format === 'both') {
+    if (this.outputFormat === 'png' || this.outputFormat === 'both') {
       files.push('og-image.png', 'opengraph.png', 'twitter-image.png');
     }
 
-    if (format === 'jpeg' || format === 'both') {
+    if (this.outputFormat === 'jpeg' || this.outputFormat === 'both') {
       files.push('og-image.jpg', 'opengraph.jpg', 'twitter-image.jpg');
     }
 
