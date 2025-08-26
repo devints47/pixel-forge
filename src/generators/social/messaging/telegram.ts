@@ -1,5 +1,5 @@
-import { BaseOpenGraphGenerator } from './base-opengraph';
-import type { PixelForgeConfig } from '../../core/config-validator';
+import { BaseOpenGraphGenerator } from '../base-opengraph';
+import type { PixelForgeConfig } from '../../../core/config-validator';
 
 export interface TelegramOptions {
   title?: string;

@@ -1,6 +1,6 @@
 import path from 'path';
-import { ImageProcessor, ImageSizes } from '../../core/image-processor';
-import type { PixelForgeConfig } from '../../core/config-validator';
+import { ImageProcessor, ImageSizes } from '../../../core/image-processor';
+import type { PixelForgeConfig } from '../../../core/config-validator';
 
 export interface LinkedInOptions {
   title?: string;
