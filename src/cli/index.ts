@@ -194,14 +194,21 @@ async function generateAll(sourceImage: string, config: PixelForgeConfig, option
     outputFormat: (options.format as 'png' | 'jpeg' | 'both') || 'png' 
   });
 
-  const files = [
-    ...await generator.getGeneratedFiles(),
-    ...faviconGenerator.getGeneratedFiles(),
-    ...pwaGenerator.getGeneratedFiles(),
-    ...seoGenerator.getGeneratedFiles()
-  ];
+  // For --all flag, scan the output directory for actual files instead of aggregating
+  // individual generator counts to avoid double-counting
+  const files = await fs.readdir(config.output.path);
+  const imageFiles = files.filter(file => 
+    file.endsWith('.png') || 
+    file.endsWith('.jpg') || 
+    file.endsWith('.jpeg') || 
+    file.endsWith('.webp') ||
+    file.endsWith('.svg') ||
+    file.endsWith('.ico') ||
+    file.endsWith('.json') ||
+    file.endsWith('.xml')
+  );
 
-  console.log(`✅ Generated ${files.length} files in ${config.output.path}`);
+  console.log(`✅ Generated ${imageFiles.length} files in ${config.output.path}`);
   
   if (options.verbose) {
     console.log('\nGenerated files:');

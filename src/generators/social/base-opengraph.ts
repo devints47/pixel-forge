@@ -39,9 +39,6 @@ export class BaseOpenGraphGenerator {
       height = ImageSizes.social.standard.height  // Default 630
     } = options;
 
-    // Reset generated files list
-    this.generatedFiles = [];
-
     await this.generateOpenGraphImage(title, description, template, filename, width, height);
     this.generatedFiles.push(filename);
   }
