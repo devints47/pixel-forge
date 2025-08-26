@@ -11,6 +11,12 @@ import { LinkedInGenerator } from '../generators/social/linkedin';
 import { TikTokGenerator } from '../generators/social/tiktok';
 import { WhatsAppGenerator } from '../generators/social/whatsapp';
 import { InstagramGenerator } from '../generators/social/instagram';
+import { SnapchatGenerator } from '../generators/social/snapchat';
+import { DiscordGenerator } from '../generators/social/discord';
+import { TelegramGenerator } from '../generators/social/telegram';
+import { SignalGenerator } from '../generators/social/signal';
+import { SlackGenerator } from '../generators/social/slack';
+import { ThreadsGenerator } from '../generators/social/threads';
 import { FaviconGenerator } from '../generators/favicon/favicon';
 import { PWAGenerator } from '../generators/pwa/pwa';
 import { WebSEOGenerator } from '../generators/web/seo';
@@ -86,6 +92,7 @@ interface CLIOptions {
   signal?: boolean;
   slack?: boolean;
   androidrcs?: boolean;
+  snapchat?: boolean;
   threads?: boolean;
   bluesky?: boolean;
   mastodon?: boolean;
@@ -208,13 +215,60 @@ async function generateAll(sourceImage: string, config: PixelForgeConfig, option
 async function generateSpecific(sourceImage: string, config: PixelForgeConfig, options: CLIOptions) {
   interface GeneratorInfo {
     name: string;
-    generator: FacebookGenerator | TwitterGenerator | LinkedInGenerator | InstagramGenerator | TikTokGenerator | WhatsAppGenerator | ComprehensiveSocialGenerator | FaviconGenerator | PWAGenerator | WebSEOGenerator;
+    generator: FacebookGenerator | TwitterGenerator | LinkedInGenerator | InstagramGenerator | TikTokGenerator | WhatsAppGenerator | SnapchatGenerator | DiscordGenerator | TelegramGenerator | SignalGenerator | SlackGenerator | ThreadsGenerator | ComprehensiveSocialGenerator | FaviconGenerator | PWAGenerator | WebSEOGenerator;
     files: string[];
   }
   
   const generators: GeneratorInfo[] = [];
 
   // Social media platforms
+  if (options.social) {
+    // Generate comprehensive social media assets (Facebook, Twitter, LinkedIn, Instagram, TikTok, Snapchat)
+    const facebookGenerator = new FacebookGenerator(sourceImage, config);
+    await facebookGenerator.generate({ includeStandard: true, includeSquare: true });
+    generators.push({ name: 'Facebook', generator: facebookGenerator, files: facebookGenerator.getGeneratedFiles() });
+
+    const twitterGenerator = new TwitterGenerator(sourceImage, config);
+    await twitterGenerator.generate({ includeStandard: true, includeSquare: true });
+    generators.push({ name: 'Twitter', generator: twitterGenerator, files: twitterGenerator.getGeneratedFiles() });
+
+    const linkedinGenerator = new LinkedInGenerator(sourceImage, config);
+    await linkedinGenerator.generate({ includeStandard: true, includeCompany: true });
+    generators.push({ name: 'LinkedIn', generator: linkedinGenerator, files: linkedinGenerator.getGeneratedFiles() });
+
+    const instagramGenerator = new InstagramGenerator(sourceImage, config);
+    await instagramGenerator.generate();
+    generators.push({ name: 'Instagram', generator: instagramGenerator, files: instagramGenerator.getGeneratedFiles() });
+
+    const tiktokGenerator = new TikTokGenerator(sourceImage, config);
+    await tiktokGenerator.generate();
+    generators.push({ name: 'TikTok', generator: tiktokGenerator, files: tiktokGenerator.getGeneratedFiles() });
+
+    const snapchatGenerator = new SnapchatGenerator(sourceImage, config);
+    await snapchatGenerator.generate();
+    generators.push({ name: 'Snapchat', generator: snapchatGenerator, files: snapchatGenerator.getGeneratedFiles() });
+
+    const discordGenerator = new DiscordGenerator(sourceImage, config);
+    await discordGenerator.generate();
+    generators.push({ name: 'Discord', generator: discordGenerator, files: discordGenerator.getGeneratedFiles() });
+
+    const telegramGenerator = new TelegramGenerator(sourceImage, config);
+    await telegramGenerator.generate();
+    generators.push({ name: 'Telegram', generator: telegramGenerator, files: telegramGenerator.getGeneratedFiles() });
+
+    const signalGenerator = new SignalGenerator(sourceImage, config);
+    await signalGenerator.generate();
+    generators.push({ name: 'Signal', generator: signalGenerator, files: signalGenerator.getGeneratedFiles() });
+
+    const slackGenerator = new SlackGenerator(sourceImage, config);
+    await slackGenerator.generate();
+    generators.push({ name: 'Slack', generator: slackGenerator, files: slackGenerator.getGeneratedFiles() });
+
+    const threadsGenerator = new ThreadsGenerator(sourceImage, config);
+    await threadsGenerator.generate();
+    generators.push({ name: 'Threads', generator: threadsGenerator, files: threadsGenerator.getGeneratedFiles() });
+  }
+
   if (options.facebook) {
     const generator = new FacebookGenerator(sourceImage, config);
     await generator.generate();
@@ -235,8 +289,14 @@ async function generateSpecific(sourceImage: string, config: PixelForgeConfig, o
 
   if (options.instagram) {
     const generator = new InstagramGenerator(sourceImage, config);
-    await generator.generate({ includeStories: false, includeReels: false }); // Avoid text overlay issues
+    await generator.generate();
     generators.push({ name: 'Instagram', generator, files: generator.getGeneratedFiles() });
+  }
+
+  if (options.snapchat) {
+    const generator = new SnapchatGenerator(sourceImage, config);
+    await generator.generate();
+    generators.push({ name: 'Snapchat', generator, files: generator.getGeneratedFiles() });
   }
 
   if (options.tiktok) {
@@ -457,22 +517,18 @@ async function generateSpecific(sourceImage: string, config: PixelForgeConfig, o
   }
 
   // Category generators
-  if (options.social) {
-    const generator = new ComprehensiveSocialGenerator(sourceImage, config);
-    await generator.generate({ includeStandard: true, includeInstagram: false, includeMessaging: false, includePlatforms: false });
-    generators.push({ name: 'Social Media', generator, files: ['facebook.png', 'twitter.png', 'linkedin.png'] });
-  }
+
 
   if (options.messaging) {
     const generator = new ComprehensiveSocialGenerator(sourceImage, config);
     await generator.generate({ includeStandard: false, includeInstagram: false, includeMessaging: true, includePlatforms: false });
-    generators.push({ name: 'Messaging Apps', generator, files: ['whatsapp-profile.png', 'discord.png', 'telegram.png', 'signal.png', 'slack.png', 'imessage.png'] });
+    generators.push({ name: 'Messaging Apps', generator, files: await generator.getGeneratedFiles() });
   }
 
   if (options.platforms) {
     const generator = new ComprehensiveSocialGenerator(sourceImage, config);
     await generator.generate({ includeStandard: false, includeInstagram: false, includeMessaging: false, includePlatforms: true });
-    generators.push({ name: 'Video Platforms', generator, files: ['tiktok.png', 'youtube-thumbnail.png', 'youtube-shorts.png', 'pinterest-pin.png', 'pinterest-board.png'] });
+    generators.push({ name: 'Video Platforms', generator, files: await generator.getGeneratedFiles() });
   }
 
   if (options.favicon) {
@@ -626,7 +682,7 @@ program
   .option('-p, --prefix <path>', 'URL prefix for generated files', '/images/')
   .option('-f, --format <format>', 'Output format (png|jpeg|webp|avif|tiff|gif)', 'png')
   .option('--all', 'Generate all asset types')
-  .option('--social', 'Generate standard social media assets (Facebook, Twitter, LinkedIn)')
+  .option('--social', 'Generate standard social media assets (Facebook, Twitter, LinkedIn, Instagram, TikTok, Snapchat, Discord, Telegram, Signal, Slack, Threads)')
   .option('--facebook', 'Generate Facebook assets only')
   .option('--twitter', 'Generate Twitter assets only')
   .option('--linkedin', 'Generate LinkedIn assets only')
@@ -641,6 +697,7 @@ program
   .option('--signal', 'Generate Signal assets only')
   .option('--slack', 'Generate Slack assets only')
   .option('--androidrcs', 'Generate Android RCS assets only')
+  .option('--snapchat', 'Generate Snapchat assets only')
   .option('--threads', 'Generate Threads assets only')
   .option('--bluesky', 'Generate Bluesky assets only')
   .option('--mastodon', 'Generate Mastodon assets only')
@@ -688,7 +745,7 @@ program
       } else if (options.facebook || options.twitter || options.linkedin || options.instagram || 
                  options.tiktok || options.whatsapp || options.youtube || options.pinterest ||
                  options.imessage || options.discord || options.telegram || options.signal ||
-                 options.slack || options.androidrcs || options.threads || options.bluesky ||
+                 options.slack || options.androidrcs || options.snapchat || options.threads || options.bluesky ||
                  options.mastodon || options.social || options.messaging || 
                  options.platforms || options.favicon || options.pwa || options.seo || options.web) {
         await generateSpecific(sourcePath, config, options);

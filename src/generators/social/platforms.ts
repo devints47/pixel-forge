@@ -87,7 +87,7 @@ export class PlatformGenerator {
       height,
       title: options.title || this.config.appName,
       description: options.description,
-      template: options.template || 'gradient',
+      template: options.template || 'basic',
       background: this.config.backgroundColor
     });
     const finalProcessor = new ImageProcessor(socialFile);
@@ -135,7 +135,7 @@ export class PlatformGenerator {
       height,
       title: options.title || this.config.appName,
       description: options.description,
-      template: options.template || 'gradient',
+      template: options.template || 'basic',
       background: this.config.backgroundColor
     });
     const finalProcessor = new ImageProcessor(socialFile);
@@ -159,7 +159,7 @@ export class PlatformGenerator {
       height,
       title: options.title || this.config.appName,
       description: options.description,
-      template: options.template || 'gradient',
+      template: options.template || 'basic',
       background: this.config.backgroundColor
     });
     const finalProcessor = new ImageProcessor(socialFile);
@@ -205,9 +205,9 @@ export class PlatformGenerator {
     const socialFile = await processor.createSocialPreview({
       width,
       height,
-      title: options.title || this.config.appName,
-      description: options.description,
-      template: options.template || 'gradient',
+      title: options.title, // Only add text if explicitly provided
+      description: options.description, // Only add text if explicitly provided
+      template: options.template || 'basic',
       background: this.config.backgroundColor
     });
     const finalProcessor = new ImageProcessor(socialFile);

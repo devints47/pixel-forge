@@ -91,8 +91,8 @@ export class MessagingGenerator {
     const socialFile = await processor.createSocialPreview({
       width,
       height,
-      title: options.title || this.config.appName,
-      description: options.description,
+      title: options.title, // Only add text if explicitly provided
+      description: options.description, // Only add text if explicitly provided
       template: options.template,
       background: this.config.backgroundColor
     });
@@ -117,8 +117,8 @@ export class MessagingGenerator {
     const squareFile = await squareProcessor.createSocialPreview({
       width: squareWidth,
       height: squareHeight,
-      title: options.title || this.config.appName,
-      description: options.description,
+      title: options.title, // Only add text if explicitly provided
+      description: options.description, // Only add text if explicitly provided
       template: options.template || 'basic',
       background: this.config.backgroundColor
     });
@@ -138,8 +138,8 @@ export class MessagingGenerator {
     const linkFile = await linkProcessor.createSocialPreview({
       width: linkWidth,
       height: linkHeight,
-      title: options.title || this.config.appName,
-      description: options.description,
+      title: options.title, // Only add text if explicitly provided
+      description: options.description, // Only add text if explicitly provided
       template: options.template,
       background: this.config.backgroundColor
     });
@@ -188,8 +188,8 @@ export class MessagingGenerator {
     const socialFile = await processor.createSocialPreview({
       width,
       height,
-      title: options.title || this.config.appName,
-      description: options.description,
+      title: options.title, // Only add text if explicitly provided
+      description: options.description, // Only add text if explicitly provided
       template: options.template,
       background: this.config.backgroundColor
     });
@@ -313,8 +313,8 @@ export class MessagingGenerator {
     const socialFile = await processor.createSocialPreview({
       width,
       height,
-      title: options.title || this.config.appName,
-      description: options.description,
+      title: options.title, // Only add text if explicitly provided
+      description: options.description, // Only add text if explicitly provided
       template: options.template,
       background: this.config.backgroundColor
     });

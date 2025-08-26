@@ -1,43 +1,43 @@
 import { BaseOpenGraphGenerator } from './base-opengraph';
 import type { PixelForgeConfig } from '../../core/config-validator';
 
-export interface TikTokOptions {
+export interface SnapchatOptions {
   title?: string;
   description?: string;
   template?: 'basic' | 'gradient' | 'custom';
 }
 
-export class TikTokGenerator extends BaseOpenGraphGenerator {
+export class SnapchatGenerator extends BaseOpenGraphGenerator {
   constructor(sourceImage: string, config: PixelForgeConfig) {
     super(sourceImage, config);
   }
 
   /**
-   * Generate TikTok OpenGraph image for website sharing
+   * Generate Snapchat OpenGraph image for website sharing
    */
-  async generate(options: TikTokOptions = {}): Promise<void> {
+  async generate(options: SnapchatOptions = {}): Promise<void> {
     const { title, description, template = 'basic' } = options;
 
-    // Generate single OpenGraph image that appears when websites are shared on TikTok
+    // Generate single OpenGraph image that appears when websites are shared on Snapchat
     await super.generate({
       title,
       description,
       template,
-      filename: 'tiktok.png'
+      filename: 'snapchat.png'
     });
   }
 
   /**
-   * Get HTML meta tags for TikTok
+   * Get HTML meta tags for Snapchat
    */
   getMetaTags(): string[] {
-    return super.getMetaTags('tiktok.png');
+    return super.getMetaTags('snapchat.png');
   }
 
   /**
-   * Get Next.js metadata configuration for TikTok
+   * Get Next.js metadata configuration for Snapchat
    */
   getNextMetadata() {
-    return super.getNextMetadata('tiktok.png');
+    return super.getNextMetadata('snapchat.png');
   }
 }

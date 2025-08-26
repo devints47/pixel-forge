@@ -13,6 +13,7 @@ export interface LinkedInOptions {
 export class LinkedInGenerator {
   private config: PixelForgeConfig;
   private sourceImage: string;
+  private generatedFiles: string[] = [];
 
   constructor(sourceImage: string, config: PixelForgeConfig) {
     this.config = config;
@@ -31,12 +32,17 @@ export class LinkedInGenerator {
       template = 'basic'
     } = options;
 
+    // Reset generated files list
+    this.generatedFiles = [];
+
     if (includeStandard) {
       await this.generateStandardImage(title, description, template);
+      this.generatedFiles.push('linkedin-share.png');
     }
 
     if (includeCompany) {
       await this.generateCompanyImage(title, description, template);
+      this.generatedFiles.push('linkedin-company.png');
     }
   }
 
@@ -149,6 +155,6 @@ export class LinkedInGenerator {
    * Get list of generated files
    */
   getGeneratedFiles(): string[] {
-    return ['linkedin.png', 'linkedin-company.png'];
+    return [...this.generatedFiles];
   }
 } 
