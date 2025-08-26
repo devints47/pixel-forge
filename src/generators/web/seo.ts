@@ -114,19 +114,27 @@ export class WebSEOGenerator {
       background: this.config.backgroundColor
     });
 
-    // Save in requested format(s)
-    if (outputFormat === 'png' || outputFormat === 'both') {
-      const outputPath = path.join(this.config.output.path, 'opengraph.png');
-      const final1 = new ImageProcessor(socialFile);
-      await final1.save(outputPath, { format: 'png', quality: this.config.output.quality });
-    }
+    const processors: ImageProcessor[] = [processor];
 
-    if (outputFormat === 'jpeg' || outputFormat === 'both') {
-      const outputPath = path.join(this.config.output.path, 'opengraph.jpg');
-      const final2 = new ImageProcessor(socialFile);
-      await final2.save(outputPath, { format: 'jpeg', quality: this.config.output.quality });
+    try {
+      // Save in requested format(s)
+      if (outputFormat === 'png' || outputFormat === 'both') {
+        const outputPath = path.join(this.config.output.path, 'opengraph.png');
+        const final1 = new ImageProcessor(socialFile);
+        processors.push(final1);
+        await final1.save(outputPath, { format: 'png', quality: this.config.output.quality });
+      }
+
+      if (outputFormat === 'jpeg' || outputFormat === 'both') {
+        const outputPath = path.join(this.config.output.path, 'opengraph.jpg');
+        const final2 = new ImageProcessor(socialFile);
+        processors.push(final2);
+        await final2.save(outputPath, { format: 'jpeg', quality: this.config.output.quality });
+      }
+    } finally {
+      // Clean up all processors
+      await Promise.all(processors.map(p => p.cleanup()));
     }
-    await processor.cleanup();
   }
 
   /**

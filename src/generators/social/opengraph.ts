@@ -23,17 +23,22 @@ export class OpenGraphGenerator {
    * Generate OpenGraph images for various platforms
    */
   async generate(): Promise<void> {
-    const { socialPreview } = this.config;
-    const options = socialPreview || {};
+    try {
+      const { socialPreview } = this.config;
+      const options = socialPreview || {};
 
-    // Generate Facebook/Default OpenGraph Image
-    await this.generateFacebookImage(options);
+      // Generate Facebook/Default OpenGraph Image
+      await this.generateFacebookImage(options);
 
-    // Generate LinkedIn Image
-    await this.generateLinkedInImage(options);
+      // Generate LinkedIn Image
+      await this.generateLinkedInImage(options);
 
-    // Generate Twitter Card Image
-    await this.generateTwitterImage(options);
+      // Generate Twitter Card Image
+      await this.generateTwitterImage(options);
+    } finally {
+      // Clean up all temporary files
+      await this.processor.cleanup();
+    }
   }
 
   /**

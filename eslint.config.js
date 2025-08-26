@@ -27,7 +27,9 @@ module.exports = tseslint.config(
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
-        projectService: true,
+        projectService: {
+          allowDefaultProject: ['src/generators/social/__tests__/*.ts'],
+        },
         tsconfigRootDir: __dirname,
       },
     },

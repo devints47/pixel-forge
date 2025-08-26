@@ -96,6 +96,7 @@ export class PlatformGenerator {
       quality: this.config.output.quality
     });
     await processor.cleanup();
+    await finalProcessor.cleanup();
   }
 
   /**
@@ -120,6 +121,7 @@ export class PlatformGenerator {
       quality: this.config.output.quality
     });
     await processor.cleanup();
+    await finalProcessor.cleanup();
   }
 
   /**
@@ -144,6 +146,7 @@ export class PlatformGenerator {
       quality: this.config.output.quality
     });
     await processor.cleanup();
+    await finalProcessor.cleanup();
   }
 
   /**
@@ -168,6 +171,7 @@ export class PlatformGenerator {
       quality: this.config.output.quality
     });
     await processor.cleanup();
+    await finalProcessor.cleanup();
   }
 
   /**
@@ -192,6 +196,7 @@ export class PlatformGenerator {
       quality: this.config.output.quality
     });
     await processor.cleanup();
+    await finalProcessor.cleanup();
   }
 
   /**
@@ -216,6 +221,7 @@ export class PlatformGenerator {
       quality: this.config.output.quality
     });
     await processor.cleanup();
+    await finalProcessor.cleanup();
   }
 
   /**
@@ -240,6 +246,7 @@ export class PlatformGenerator {
       quality: this.config.output.quality
     });
     await processor.cleanup();
+    await finalProcessor.cleanup();
   }
 
   /**
@@ -264,6 +271,7 @@ export class PlatformGenerator {
       quality: this.config.output.quality
     });
     await processor.cleanup();
+    await finalProcessor.cleanup();
   }
 
   /**
@@ -288,6 +296,7 @@ export class PlatformGenerator {
       quality: this.config.output.quality
     });
     await processor.cleanup();
+    await finalProcessor.cleanup();
   }
 
   /**

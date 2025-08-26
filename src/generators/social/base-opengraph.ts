@@ -64,21 +64,30 @@ export class BaseOpenGraphGenerator {
     const outputPath = path.join(this.config.output.path, filename);
 
     const processor = new ImageProcessor(this.sourceImage);
-    const socialFile = await processor.createSocialPreview({
-      width: width || ImageSizes.social.standard.width,
-      height: height || ImageSizes.social.standard.height,
-      title, // Only add text if explicitly provided
-      description, // Only add text if explicitly provided
-      template,
-      background: this.config.backgroundColor
-    });
+    let finalProcessor: ImageProcessor | undefined;
     
-    const finalProcessor = new ImageProcessor(socialFile);
-    await finalProcessor.save(outputPath, {
-      format: 'png',
-      quality: this.config.output.quality
-    });
-    await processor.cleanup();
+    try {
+      const socialFile = await processor.createSocialPreview({
+        width: width || ImageSizes.social.standard.width,
+        height: height || ImageSizes.social.standard.height,
+        title, // Only add text if explicitly provided
+        description, // Only add text if explicitly provided
+        template,
+        background: this.config.backgroundColor
+      });
+      
+      finalProcessor = new ImageProcessor(socialFile);
+      await finalProcessor.save(outputPath, {
+        format: 'png',
+        quality: this.config.output.quality
+      });
+    } finally {
+      // Clean up all temporary files from both processors
+      await processor.cleanup();
+      if (finalProcessor) {
+        await finalProcessor.cleanup();
+      }
+    }
   }
 
   /**
