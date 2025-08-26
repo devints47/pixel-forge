@@ -11,6 +11,12 @@ import { LinkedInGenerator } from '../generators/social/linkedin';
 import { TikTokGenerator } from '../generators/social/tiktok';
 import { WhatsAppGenerator } from '../generators/social/whatsapp';
 import { InstagramGenerator } from '../generators/social/instagram';
+import { SnapchatGenerator } from '../generators/social/snapchat';
+import { DiscordGenerator } from '../generators/social/discord';
+import { TelegramGenerator } from '../generators/social/telegram';
+import { SignalGenerator } from '../generators/social/signal';
+import { SlackGenerator } from '../generators/social/slack';
+import { ThreadsGenerator } from '../generators/social/threads';
 import { FaviconGenerator } from '../generators/favicon/favicon';
 import { PWAGenerator } from '../generators/pwa/pwa';
 import { WebSEOGenerator } from '../generators/web/seo';
@@ -209,7 +215,7 @@ async function generateAll(sourceImage: string, config: PixelForgeConfig, option
 async function generateSpecific(sourceImage: string, config: PixelForgeConfig, options: CLIOptions) {
   interface GeneratorInfo {
     name: string;
-    generator: FacebookGenerator | TwitterGenerator | LinkedInGenerator | InstagramGenerator | TikTokGenerator | WhatsAppGenerator | ComprehensiveSocialGenerator | FaviconGenerator | PWAGenerator | WebSEOGenerator;
+    generator: FacebookGenerator | TwitterGenerator | LinkedInGenerator | InstagramGenerator | TikTokGenerator | WhatsAppGenerator | SnapchatGenerator | DiscordGenerator | TelegramGenerator | SignalGenerator | SlackGenerator | ThreadsGenerator | ComprehensiveSocialGenerator | FaviconGenerator | PWAGenerator | WebSEOGenerator;
     files: string[];
   }
   
@@ -231,23 +237,36 @@ async function generateSpecific(sourceImage: string, config: PixelForgeConfig, o
     generators.push({ name: 'LinkedIn', generator: linkedinGenerator, files: linkedinGenerator.getGeneratedFiles() });
 
     const instagramGenerator = new InstagramGenerator(sourceImage, config);
-    await instagramGenerator.generate({ includeStories: true, includeReels: true });
+    await instagramGenerator.generate();
     generators.push({ name: 'Instagram', generator: instagramGenerator, files: instagramGenerator.getGeneratedFiles() });
 
     const tiktokGenerator = new TikTokGenerator(sourceImage, config);
-    await tiktokGenerator.generate({ includeVertical: true, includeProfile: true });
+    await tiktokGenerator.generate();
     generators.push({ name: 'TikTok', generator: tiktokGenerator, files: tiktokGenerator.getGeneratedFiles() });
 
-    // Add Snapchat via PlatformGenerator
-    const platformGenerator = new ComprehensiveSocialGenerator(sourceImage, config);
-    await platformGenerator.generate({ 
-      includeStandard: false, 
-      includeInstagram: false, 
-      includeMessaging: false, 
-      includePlatforms: true,
-      platforms: { snapchat: true, tiktok: false, youtube: false, pinterest: false, threads: false, bluesky: false, mastodon: false }
-    });
-    generators.push({ name: 'Snapchat', generator: platformGenerator, files: ['snapchat.png'] });
+    const snapchatGenerator = new SnapchatGenerator(sourceImage, config);
+    await snapchatGenerator.generate();
+    generators.push({ name: 'Snapchat', generator: snapchatGenerator, files: snapchatGenerator.getGeneratedFiles() });
+
+    const discordGenerator = new DiscordGenerator(sourceImage, config);
+    await discordGenerator.generate();
+    generators.push({ name: 'Discord', generator: discordGenerator, files: discordGenerator.getGeneratedFiles() });
+
+    const telegramGenerator = new TelegramGenerator(sourceImage, config);
+    await telegramGenerator.generate();
+    generators.push({ name: 'Telegram', generator: telegramGenerator, files: telegramGenerator.getGeneratedFiles() });
+
+    const signalGenerator = new SignalGenerator(sourceImage, config);
+    await signalGenerator.generate();
+    generators.push({ name: 'Signal', generator: signalGenerator, files: signalGenerator.getGeneratedFiles() });
+
+    const slackGenerator = new SlackGenerator(sourceImage, config);
+    await slackGenerator.generate();
+    generators.push({ name: 'Slack', generator: slackGenerator, files: slackGenerator.getGeneratedFiles() });
+
+    const threadsGenerator = new ThreadsGenerator(sourceImage, config);
+    await threadsGenerator.generate();
+    generators.push({ name: 'Threads', generator: threadsGenerator, files: threadsGenerator.getGeneratedFiles() });
   }
 
   if (options.facebook) {
@@ -270,20 +289,14 @@ async function generateSpecific(sourceImage: string, config: PixelForgeConfig, o
 
   if (options.instagram) {
     const generator = new InstagramGenerator(sourceImage, config);
-    await generator.generate({ includeStories: true, includeReels: true });
+    await generator.generate();
     generators.push({ name: 'Instagram', generator, files: generator.getGeneratedFiles() });
   }
 
   if (options.snapchat) {
-    const generator = new ComprehensiveSocialGenerator(sourceImage, config);
-    await generator.generate({ 
-      includeStandard: false, 
-      includeInstagram: false, 
-      includeMessaging: false, 
-      includePlatforms: true,
-      platforms: { snapchat: true, tiktok: false, youtube: false, pinterest: false, threads: false, bluesky: false, mastodon: false }
-    });
-    generators.push({ name: 'Snapchat', generator, files: ['snapchat.png'] });
+    const generator = new SnapchatGenerator(sourceImage, config);
+    await generator.generate();
+    generators.push({ name: 'Snapchat', generator, files: generator.getGeneratedFiles() });
   }
 
   if (options.tiktok) {
@@ -669,7 +682,7 @@ program
   .option('-p, --prefix <path>', 'URL prefix for generated files', '/images/')
   .option('-f, --format <format>', 'Output format (png|jpeg|webp|avif|tiff|gif)', 'png')
   .option('--all', 'Generate all asset types')
-  .option('--social', 'Generate standard social media assets (Facebook, Twitter, LinkedIn, Instagram, TikTok, Snapchat)')
+  .option('--social', 'Generate standard social media assets (Facebook, Twitter, LinkedIn, Instagram, TikTok, Snapchat, Discord, Telegram, Signal, Slack, Threads)')
   .option('--facebook', 'Generate Facebook assets only')
   .option('--twitter', 'Generate Twitter assets only')
   .option('--linkedin', 'Generate LinkedIn assets only')
