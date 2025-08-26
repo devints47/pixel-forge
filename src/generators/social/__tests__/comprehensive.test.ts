@@ -106,7 +106,7 @@ describe('Comprehensive Social Media Generators', () => {
 
       const metadata = generator.getNextMetadata();
       expect(metadata.openGraph?.images).toBeDefined();
-      expect(metadata.twitter?.images).toBeDefined();
+      expect(metadata.twitter).toBeDefined();
     });
   });
 

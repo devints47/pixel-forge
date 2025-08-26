@@ -66,7 +66,7 @@ export class WebSEOGenerator {
     const processor = new ImageProcessor(this.sourceImage);
     
     // Create social preview with template
-    processor.createSocialPreview({
+    await processor.createSocialPreview({
       width,
       height,
       title,
@@ -101,7 +101,7 @@ export class WebSEOGenerator {
 
     const processor = new ImageProcessor(this.sourceImage);
     
-    processor.createSocialPreview({
+    await processor.createSocialPreview({
       width,
       height,
       title,
@@ -136,7 +136,7 @@ export class WebSEOGenerator {
 
     const processor = new ImageProcessor(this.sourceImage);
     
-    processor.createSocialPreview({
+    await processor.createSocialPreview({
       width,
       height,
       title,
