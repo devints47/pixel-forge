@@ -112,9 +112,7 @@ export class ComprehensiveSocialGenerator {
     await generator.generate({
       title: options.title,
       description: options.description,
-      template: options.template,
-      includeStories: options.platforms?.instagramStories !== false,
-      includeReels: options.platforms?.instagramReels !== false
+      template: options.template
     });
   }
 
@@ -201,8 +199,7 @@ export class ComprehensiveSocialGenerator {
         ]
       },
       twitter: {
-        ...standardMeta.twitter,
-        ...instagramMeta.twitter
+        ...standardMeta.twitter
       },
       other: {
         ...messagingMeta.other,
