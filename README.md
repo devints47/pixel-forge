@@ -163,9 +163,11 @@ Generate everything you need for a modern web application:
 npx pixel-forge generate logo.png --web
 
 # Or generate specific web assets
-npx pixel-forge generate logo.png --seo      # OpenGraph & Twitter cards
-npx pixel-forge generate logo.png --favicon  # All favicon formats  
-npx pixel-forge generate logo.png --pwa      # PWA icons & manifest
+npx pixel-forge generate logo.png --seo         # OpenGraph & Twitter cards
+npx pixel-forge generate logo.png --favicon     # All favicon formats  
+npx pixel-forge generate logo.png --pwa         # PWA icons & manifest
+npx pixel-forge generate logo.png --social      # All social platforms (11 platforms)
+npx pixel-forge generate logo.png --messaging   # All messaging platforms
 
 # Generate in both PNG and JPEG formats
 npx pixel-forge generate logo.png --web --format both
