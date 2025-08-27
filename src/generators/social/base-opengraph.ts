@@ -64,20 +64,41 @@ export class BaseOpenGraphGenerator {
     let finalProcessor: ImageProcessor | undefined;
     
     try {
-      const socialFile = await processor.createSocialPreview({
-        width: width || ImageSizes.social.standard.width,
-        height: height || ImageSizes.social.standard.height,
-        title, // Only add text if explicitly provided
-        description, // Only add text if explicitly provided
-        template,
-        background: this.config.backgroundColor
-      });
-      
-      finalProcessor = new ImageProcessor(socialFile);
-      await finalProcessor.save(outputPath, {
-        format: 'png',
-        quality: this.config.output.quality
-      });
+      // If no text overlay is needed, use simple resize like mstile generation
+      // This prevents unwanted text and uses proper 'contain' fit to avoid cropping
+      if (!title && !description) {
+        const resizedFile = await processor.resize(
+          width || ImageSizes.social.standard.width,
+          height || ImageSizes.social.standard.height,
+          { 
+            fit: 'contain',  // Like mstile - prevents cropping
+            background: this.config.backgroundColor || this.config.themeColor,
+            zoom: 1.0
+          }
+        );
+        
+        finalProcessor = new ImageProcessor(resizedFile);
+        await finalProcessor.save(outputPath, {
+          format: 'png',
+          quality: this.config.output.quality
+        });
+      } else {
+        // Only use createSocialPreview when we actually need text overlay
+        const socialFile = await processor.createSocialPreview({
+          width: width || ImageSizes.social.standard.width,
+          height: height || ImageSizes.social.standard.height,
+          title, // Only add text if explicitly provided
+          description, // Only add text if explicitly provided
+          template,
+          background: this.config.backgroundColor
+        });
+        
+        finalProcessor = new ImageProcessor(socialFile);
+        await finalProcessor.save(outputPath, {
+          format: 'png',
+          quality: this.config.output.quality
+        });
+      }
     } finally {
       // Clean up all temporary files from both processors
       await processor.cleanup();
