@@ -60,6 +60,7 @@ export interface ImageProcessorOptions {
   background?: string;
   fit?: 'cover' | 'contain' | 'fill';
   zoom?: number; // Zoom factor (e.g., 1.1 for 10% zoom)
+  autoDetectBackground?: boolean; // Auto-detect background color from image borders
 }
 
 export interface TextOptions {
@@ -69,6 +70,16 @@ export interface TextOptions {
   color?: string;
   position?: 'center' | 'top' | 'bottom';
   offset?: { x: number; y: number };
+}
+
+type RGBA = { r: number; g: number; b: number; alpha: number };
+
+interface BackgroundDetectionOptions {
+  sampleSize?: number; // longest side for analysis
+  borderFrac?: number; // 0.03 - 0.08 is good
+  alphaThreshold?: number; // 0..255; below this is "transparent"
+  quantBits?: number; // 3..5 (4 is a good balance)
+  transparentBorderRatio?: number; // ratio to treat bg as transparent
 }
 
 function parseHexToRgb(hex: string): { r: number; g: number; b: number } {
@@ -202,8 +213,21 @@ export class ImageProcessor {
     const {
       fit = 'cover',
       background = 'transparent',
-      zoom = 1.0
+      zoom = 1.0,
+      autoDetectBackground = false
     } = options;
+
+    // Auto-detect background color if requested and using 'contain' fit
+    let finalBackground = background;
+    if (autoDetectBackground && fit === 'contain') {
+      try {
+        const { bg, isTransparentBg } = await this.inferBackgroundColor();
+        finalBackground = this.rgbaToColorString(bg, isTransparentBg);
+      } catch (error) {
+        console.warn('Background color detection failed, using provided background:', error);
+        finalBackground = background;
+      }
+    }
 
     // Use mock implementation in test mode
     if (MOCK_MODE) {
@@ -247,8 +271,8 @@ export class ImageProcessor {
         const y = Math.max(0, Math.floor((img.bitmap.height - height) / 2));
         img.crop(x, y, Math.min(width, img.bitmap.width), Math.min(height, img.bitmap.height));
       } else if (fit === 'contain') {
-        const { r: br, g: bg, b: bb } = parseHexToRgb(background);
-        const bgColor = background === 'transparent' ? 0x00000000 : ((br & 0xff) << 24) + ((bg & 0xff) << 16) + ((bb & 0xff) << 8) + 0xff;
+        const { r: br, g: bg, b: bb } = parseHexToRgb(finalBackground);
+        const bgColor = finalBackground === 'transparent' ? 0x00000000 : ((br & 0xff) << 24) + ((bg & 0xff) << 16) + ((bb & 0xff) << 8) + 0xff;
         const canvas = new Jimp(width, height, bgColor);
         const x = Math.floor((width - img.bitmap.width) / 2);
         const y = Math.floor((height - img.bitmap.height) / 2);
@@ -287,10 +311,10 @@ export class ImageProcessor {
       args.push('-resize', `${width}x${height}`);
       args.push('-gravity', 'center');
       // Preserve transparency during extent operation
-      if (background === 'transparent') {
+      if (finalBackground === 'transparent') {
         args.push('-background', 'none');
       } else {
-        args.push('-background', background);
+        args.push('-background', finalBackground);
       }
       args.push('-extent', `${width}x${height}`);
     } else if (fit === 'cover') {
@@ -616,7 +640,8 @@ export class ImageProcessor {
     // Start with resized base image using 'contain' to prevent cropping
     let currentFile = await this.resize(width, height, {
       fit: 'contain',  // Prevent cropping like mstile generation
-      background
+      background,
+      autoDetectBackground: true  // Auto-detect background for better results
     });
 
     // Add gradient overlay if template is gradient
@@ -645,6 +670,188 @@ export class ImageProcessor {
     }
 
     return currentFile;
+  }
+
+  /**
+   * Infer background color from image using sophisticated border analysis
+   * Adapted from the downsampling.ts approach for robust color detection
+   */
+  async inferBackgroundColor(options: BackgroundDetectionOptions = {}): Promise<{ bg: RGBA; isTransparentBg: boolean }> {
+    const opts = {
+      sampleSize: 256,
+      borderFrac: 0.05,
+      alphaThreshold: 10,
+      quantBits: 4,
+      transparentBorderRatio: 0.8,
+      ...options
+    };
+
+    // Use mock implementation in test mode
+    if (MOCK_MODE) {
+      return { bg: { r: 255, g: 255, b: 255, alpha: 1 }, isTransparentBg: false };
+    }
+
+    if (ImageProcessor.getEngine() === 'magick') {
+      return this.inferBackgroundColorImageMagick(opts);
+    } else {
+      return this.inferBackgroundColorJimp(opts);
+    }
+  }
+
+  /**
+   * ImageMagick-based background color detection
+   */
+  private async inferBackgroundColorImageMagick(opts: Required<BackgroundDetectionOptions>): Promise<{ bg: RGBA; isTransparentBg: boolean }> {
+    const magickCmd = await ImageProcessor.getMagickCommand();
+    
+    // 1) Get size after resize to sample size
+    const { stdout: sizeOut } = await execFileAsync(magickCmd, [
+      this.source,
+      '-auto-orient',
+      '-resize',
+      `${opts.sampleSize}x${opts.sampleSize}>`,
+      '-format',
+      '%w %h',
+      'info:'
+    ]);
+    
+    const [wStr, hStr] = sizeOut.trim().split(/\s+/);
+    const width = parseInt(wStr, 10);
+    const height = parseInt(hStr, 10);
+
+    // 2) Get raw RGBA for the resized image
+    const { stdout } = await execFileAsync(magickCmd, [
+      this.source,
+      '-auto-orient',
+      '-resize',
+      `${opts.sampleSize}x${opts.sampleSize}>`,
+      '-alpha',
+      'on',
+      '-depth',
+      '8',
+      'rgba:-'
+    ], { encoding: 'buffer', maxBuffer: 1024 * 1024 * 50 });
+
+    return this.inferBgFromRGBA(stdout as unknown as Buffer, width, height, opts);
+  }
+
+  /**
+   * Jimp-based background color detection
+   */
+  private async inferBackgroundColorJimp(opts: Required<BackgroundDetectionOptions>): Promise<{ bg: RGBA; isTransparentBg: boolean }> {
+    const Jimp = await getJimp();
+    let img = await Jimp.read(this.source);
+    
+    // Resize to sample size if needed
+    const maxDim = Math.max(img.bitmap.width, img.bitmap.height);
+    if (maxDim > opts.sampleSize) {
+      const scale = opts.sampleSize / maxDim;
+      img = img.resize(Math.round(img.bitmap.width * scale), Math.round(img.bitmap.height * scale), Jimp.RESIZE_BICUBIC);
+    }
+
+    const { width, height, data } = img.bitmap;
+    return this.inferBgFromRGBA(Buffer.from(data), width, height, opts);
+  }
+
+  /**
+   * Core background inference logic using histogram analysis
+   */
+  private inferBgFromRGBA(data: Buffer, width: number, height: number, opts: Required<BackgroundDetectionOptions>): { bg: RGBA; isTransparentBg: boolean } {
+    const { borderFrac, alphaThreshold, quantBits, transparentBorderRatio } = opts;
+
+    const border = Math.max(2, Math.round(Math.min(width, height) * borderFrac));
+    const c = 4; // RGBA
+    const shift = 8 - quantBits;
+
+    const hist = new Map<number, { count: number; sumR: number; sumG: number; sumB: number }>();
+
+    let totalBorder = 0;
+    let transparentCount = 0;
+    let sumRAll = 0;
+    let sumGAll = 0;
+    let sumBAll = 0;
+    let countAll = 0;
+
+    const pushPixel = (r: number, g: number, b: number) => {
+      const rq = r >> shift;
+      const gq = g >> shift;
+      const bq = b >> shift;
+      const key = (rq << (quantBits * 2)) | (gq << quantBits) | bq;
+      const bin = hist.get(key);
+      if (bin) {
+        bin.count++;
+        bin.sumR += r;
+        bin.sumG += g;
+        bin.sumB += b;
+      } else {
+        hist.set(key, { count: 1, sumR: r, sumG: g, sumB: b });
+      }
+      sumRAll += r;
+      sumGAll += g;
+      sumBAll += b;
+      countAll++;
+    };
+
+    // Sample border pixels
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const onBorder = x < border || x >= width - border || y < border || y >= height - border;
+        if (!onBorder) continue;
+        
+        const idx = (y * width + x) * c;
+        const r = data[idx];
+        const g = data[idx + 1];
+        const b = data[idx + 2];
+        const a = data[idx + 3];
+        
+        totalBorder++;
+        if (a < alphaThreshold) {
+          transparentCount++;
+          continue;
+        }
+        pushPixel(r, g, b);
+      }
+    }
+
+    const transparentRatio = totalBorder > 0 ? transparentCount / totalBorder : 0;
+
+    if (transparentRatio >= transparentBorderRatio) {
+      return { bg: { r: 0, g: 0, b: 0, alpha: 0 }, isTransparentBg: true };
+    }
+
+    if (countAll < 16) {
+      return { bg: { r: 255, g: 255, b: 255, alpha: 1 }, isTransparentBg: false };
+    }
+
+    let best = { count: 0, sumR: 0, sumG: 0, sumB: 0 };
+    for (const [, bin] of hist.entries()) {
+      if (bin.count > best.count) {
+        best = bin;
+      }
+    }
+
+    const dominantShare = best.count / countAll;
+    const useGlobalMean = dominantShare < 0.4;
+
+    const r = useGlobalMean
+      ? Math.round(sumRAll / countAll)
+      : Math.round(best.sumR / best.count);
+    const g = useGlobalMean
+      ? Math.round(sumGAll / countAll)
+      : Math.round(best.sumG / best.count);
+    const b = useGlobalMean
+      ? Math.round(sumBAll / countAll)
+      : Math.round(best.sumB / best.count);
+
+    return { bg: { r, g, b, alpha: 1 }, isTransparentBg: false };
+  }
+
+  /**
+   * Convert RGBA to ImageMagick color string
+   */
+  private rgbaToColorString(bg: RGBA, isTransparent: boolean): string {
+    if (isTransparent || bg.alpha === 0) return 'transparent';
+    return `rgb(${bg.r},${bg.g},${bg.b})`;
   }
 
   /**
