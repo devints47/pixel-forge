@@ -49,4 +49,6 @@ Thumbs.db
 .yarn-integrity
 .pnpm-store/ 
 
-test_output/
+test-output/
+
+.cursor/
