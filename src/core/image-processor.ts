@@ -613,9 +613,9 @@ export class ImageProcessor {
       return this.createMockOutputFile();
     }
 
-    // Start with resized base image
+    // Start with resized base image using 'contain' to prevent cropping
     let currentFile = await this.resize(width, height, {
-      fit: 'cover',
+      fit: 'contain',  // Prevent cropping like mstile generation
       background
     });
 

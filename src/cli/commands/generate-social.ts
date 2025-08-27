@@ -40,12 +40,11 @@ export async function generateComprehensiveSocial(
   const results: SocialGeneratorResult[] = [];
 
   // Generate a general OpenGraph image for standard social sharing
+  // Don't add text overlay - just resize the image properly
   const { BaseOpenGraphGenerator } = await import('../../generators/social/base-opengraph');
   const generalGenerator = new BaseOpenGraphGenerator(sourceImage, config);
   await generalGenerator.generate({
-    title: config.socialPreview?.title || config.appName,
-    description: config.socialPreview?.description || config.description,
-    template: config.socialPreview?.template || 'basic',
+    // Don't pass title/description to avoid text overlay
     filename: 'social-media-general.png',
     width: 1200,
     height: 630
@@ -119,9 +118,7 @@ export async function generateSpecificSocial(
     const { BaseOpenGraphGenerator } = await import('../../generators/social/base-opengraph');
     const generalGenerator = new BaseOpenGraphGenerator(sourceImage, config);
     await generalGenerator.generate({
-      title: config.socialPreview?.title || config.appName,
-      description: config.socialPreview?.description || config.description,
-      template: config.socialPreview?.template || 'basic',
+      // Don't pass title/description to avoid text overlay
       filename: 'social-media-general.png',
       width: 1200,
       height: 630
@@ -139,9 +136,7 @@ export async function generateSpecificSocial(
     const { BaseOpenGraphGenerator } = await import('../../generators/social/base-opengraph');
     const generalGenerator = new BaseOpenGraphGenerator(sourceImage, config);
     await generalGenerator.generate({
-      title: config.socialPreview?.title || config.appName,
-      description: config.socialPreview?.description || config.description,
-      template: config.socialPreview?.template || 'basic',
+      // Don't pass title/description to avoid text overlay
       filename: 'social-media-general.png',
       width: 1200,
       height: 630
