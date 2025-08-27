@@ -216,7 +216,8 @@ export class FaviconGenerator {
       const resizedFile = await processor.resize(180, 180, { 
         fit: 'contain', 
         background: this.config.backgroundColor,
-        zoom: 1.1
+        zoom: 1.1,
+        autoDetectBackground: true  // Auto-detect background for Apple touch icon
       });
       const finalProcessor = new ImageProcessor(resizedFile);
       const outputPath = path.join(this.config.output.path, 'apple-touch-icon.png');
@@ -241,7 +242,8 @@ export class FaviconGenerator {
         const resizedFile = await processor.resize(size, size, { 
           fit: 'contain', 
           background: this.config.backgroundColor,
-          zoom: 1.1
+          zoom: 1.1,
+          autoDetectBackground: true  // Auto-detect background for Android icons
         });
         const finalProcessor = new ImageProcessor(resizedFile);
         const outputPath = path.join(this.config.output.path, `android-chrome-${size}x${size}.png`);
@@ -270,7 +272,8 @@ export class FaviconGenerator {
         const resizedFile = await processor.resize(size.width, size.height, { 
           fit: 'contain', 
           background: this.config.themeColor,
-          zoom: 1.1
+          zoom: 1.1,
+          autoDetectBackground: true  // Auto-detect background for mstile images
         });
         const finalProcessor = new ImageProcessor(resizedFile);
         const outputPath = path.join(this.config.output.path, `mstile-${size.width}x${size.height}.png`);

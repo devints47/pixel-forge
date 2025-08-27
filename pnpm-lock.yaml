@@ -11,6 +11,9 @@ importers:
       chalk:
         specifier: ^5.5.0
         version: 5.5.0
+      cli-progress:
+        specifier: ^3.12.0
+        version: 3.12.0
       commander:
         specifier: ^14.0.0
         version: 14.0.0
@@ -24,6 +27,9 @@ importers:
       '@jest/globals':
         specifier: ^29.7.0
         version: 29.7.0
+      '@types/cli-progress':
+        specifier: ^3.11.6
+        version: 3.11.6
       '@types/jest':
         specifier: ^29.5.14
         version: 29.5.14
@@ -622,6 +628,9 @@ packages:
   '@types/babel__traverse@7.20.7':
     resolution: {integrity: sha512-dkO5fhS7+/oos4ciWxyEyjWe48zmG6wbCheo/G2ZnHx4fs3EU6YC6UM8rk56gAjNJ9P3MTH2jo5jb92/K6wbng==}
 
+  '@types/cli-progress@3.11.6':
+    resolution: {integrity: sha512-cE3+jb9WRlu+uOSAugewNpITJDt1VF8dHOopPO4IABFc3SXYL5WE/+PTz/FCdZRRfIujiWW3n3aMbv1eIGVRWA==}
+
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
 
@@ -899,6 +908,10 @@ packages:
 
   cjs-module-lexer@1.4.3:
     resolution: {integrity: sha512-9z8TZaGM1pfswYeXrUpzPrkx8UnWYdhJclsiYMm6x/w5+nN+8Tf/LnAgfLGQCm59qAOxU8WwHEq2vNwF6i4j+Q==}
+
+  cli-progress@3.12.0:
+    resolution: {integrity: sha512-tRkV3HJ1ASwm19THiiLIXLO7Im7wlTuKnvkYaTkyoAPefqjNg7W7DHKUlGRxy9vxDvbyCYQkQozvptuMkGCg8A==}
+    engines: {node: '>=4'}
 
   cliui@8.0.1:
     resolution: {integrity: sha512-BSeNnyus75C4//NQ9gQt1/csTXyo/8Sb+afLAkzAptFuMsod9HFokGNudZpi/oQV73hnVK+sR+5PVRMd+Dr7YQ==}
@@ -3041,6 +3054,10 @@ snapshots:
     dependencies:
       '@babel/types': 7.28.2
 
+  '@types/cli-progress@3.11.6':
+    dependencies:
+      '@types/node': 22.16.5
+
   '@types/estree@1.0.8': {}
 
   '@types/graceful-fs@4.1.9':
@@ -3371,6 +3388,10 @@ snapshots:
     optional: true
 
   cjs-module-lexer@1.4.3: {}
+
+  cli-progress@3.12.0:
+    dependencies:
+      string-width: 4.2.3
 
   cliui@8.0.1:
     dependencies:

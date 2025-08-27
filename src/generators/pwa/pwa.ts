@@ -77,7 +77,8 @@ export class PWAGenerator {
 
       const resizedFile = await processor.resize(size, size, { 
         fit: 'contain', 
-        background: this.config.backgroundColor 
+        background: this.config.backgroundColor,
+        autoDetectBackground: true  // Auto-detect background for PWA icons
       });
       
       const finalProcessor = new ImageProcessor(resizedFile);
@@ -107,7 +108,8 @@ export class PWAGenerator {
 
       const resizedFile = await processor.resize(size, size, { 
         fit: 'contain', 
-        background: this.config.backgroundColor 
+        background: this.config.backgroundColor,
+        autoDetectBackground: true  // Auto-detect background for PWA icons
       });
       
       const finalProcessor = new ImageProcessor(resizedFile);
@@ -129,7 +131,8 @@ export class PWAGenerator {
 
       const resizedFile = await processor.resize(size, size, { 
         fit: 'contain', 
-        background: this.config.backgroundColor 
+        background: this.config.backgroundColor,
+        autoDetectBackground: true  // Auto-detect background for PWA icons
       });
       
       const finalProcessor = new ImageProcessor(resizedFile);
@@ -151,7 +154,8 @@ export class PWAGenerator {
 
       const resizedFile = await processor.resize(size, size, { 
         fit: 'contain', 
-        background: this.config.backgroundColor 
+        background: this.config.backgroundColor,
+        autoDetectBackground: true  // Auto-detect background for PWA icons
       });
       
       const finalProcessor = new ImageProcessor(resizedFile);
@@ -201,7 +205,8 @@ export class PWAGenerator {
 
     const resizedFile = await processor.resize(width, height, { 
       fit: 'contain', 
-      background: this.config.backgroundColor 
+      background: this.config.backgroundColor,
+      autoDetectBackground: true  // Auto-detect background for splash screens
     });
     
     const finalProcessor = new ImageProcessor(resizedFile);

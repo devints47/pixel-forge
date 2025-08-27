@@ -73,7 +73,8 @@ export class BaseOpenGraphGenerator {
           { 
             fit: 'contain',  // Like mstile - prevents cropping
             background: this.config.backgroundColor || this.config.themeColor,
-            zoom: 1.0
+            zoom: 1.0,
+            autoDetectBackground: true  // Auto-detect background color to avoid white letterboxing
           }
         );
         

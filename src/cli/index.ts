@@ -88,7 +88,8 @@ program
       await fs.mkdir(config.output.path, { recursive: true });
       
       console.log(`📁 Output directory: ${config.output.path}`);
-      console.log(`🎨 Theme: ${config.themeColor} | Background: ${config.backgroundColor}\n`);
+      console.log(`🎨 Theme: ${config.themeColor} | Background: ${config.backgroundColor}`);
+      console.log(`🔍 Colors auto-detected for optimal image backgrounds\n`);
 
       // Generate assets using the new orchestrator
       await generateAssets(sourcePath, config, options as GenerateOptions);
