@@ -1,5 +1,4 @@
 import { generatePlatforms } from '../../generators/social/platforms/factory';
-import { generateMessaging } from '../../generators/social/messaging/factory';
 import type { PixelForgeConfig } from '../../core/config-validator';
 
 export interface SocialGeneratorResult {
