@@ -63,11 +63,6 @@ program
   .option('--pwa', 'Generate PWA assets only')
   .option('--seo', 'Generate SEO/OpenGraph assets only')
   .option('--web', 'Generate complete web development package (favicon + PWA + SEO)')
-  .option('-t, --title <text>', 'App title')
-  .option('-d, --description <text>', 'App description')
-  .option('--theme-color <color>', 'Theme color (hex)', '#000000')
-  .option('--background-color <color>', 'Background color (hex)', '#ffffff')
-  .option('--template <type>', 'Template type (basic|gradient|custom)', 'basic')
   .option('-v, --verbose', 'Verbose output')
   .action(async (source: string, options: CLIOptions) => {
     try {
@@ -88,8 +83,7 @@ program
       await fs.mkdir(config.output.path, { recursive: true });
       
       console.log(`📁 Output directory: ${config.output.path}`);
-      console.log(`🎨 Theme: ${config.themeColor} | Background: ${config.backgroundColor}`);
-      console.log(`🔍 Colors auto-detected for optimal image backgrounds\n`);
+      console.log(`🔍 Background colors auto-detected for optimal results\n`);
 
       // Generate assets using the new orchestrator
       await generateAssets(sourcePath, config, options as GenerateOptions);

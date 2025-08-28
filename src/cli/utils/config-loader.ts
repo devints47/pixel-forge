@@ -7,11 +7,6 @@ export interface CLIOptions {
   quality?: string;
   prefix?: string;
   format?: string;
-  title?: string;
-  description?: string;
-  themeColor?: string;
-  backgroundColor?: string;
-  template?: string;
   verbose?: boolean;
 }
 
@@ -34,17 +29,16 @@ export async function loadConfig(
     }
   }
 
-  // Create final configuration with CLI option overrides
+  // Create final configuration with sensible hardcoded defaults
   const finalConfig: PixelForgeConfig = {
-    appName: config.appName || options.title || 'My App',
-    description: config.description || options.description || 'Generated with Pixel Forge',
-    themeColor: config.themeColor || options.themeColor || '#000000',
-    backgroundColor: config.backgroundColor || options.backgroundColor || '#ffffff',
+    appName: config.appName || 'Generated Asset', // Simple placeholder for metadata
+    description: config.description || 'Boilerplate image assets for web applications', // Simple placeholder
+    themeColor: config.themeColor || '#007bff', // Hardcoded sensible default
+    backgroundColor: config.backgroundColor || '#ffffff', // Hardcoded sensible default
     
     socialPreview: {
-      title: options.title || config.socialPreview?.title || config.appName || 'My App',
-      description: options.description || config.socialPreview?.description || config.description || '',
-      template: (options.template as 'basic' | 'gradient' | 'custom') || config.socialPreview?.template || 'basic'
+      template: config.socialPreview?.template || 'basic'
+      // No title/description to avoid text overlays on images
     },
 
     platforms: {
