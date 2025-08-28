@@ -13,15 +13,14 @@ export async function initProject(directory: string = '.'): Promise<void> {
 
   const configPath = path.join(directory, 'pixel-forge.config.json');
   const defaultConfig: PixelForgeConfig = {
-    appName: 'My App',
-    description: 'My awesome application',
-    themeColor: '#000000',
-    backgroundColor: '#ffffff',
+    appName: 'Generated Asset',
+    description: 'Boilerplate image assets for web applications',
+    themeColor: '#007bff',  // Hardcoded sensible default
+    backgroundColor: '#ffffff',  // Hardcoded sensible default
     
     socialPreview: {
-      title: 'My App',
-      description: 'My awesome application',
       template: 'basic'
+      // No title/description to generate clean images without text overlays
     },
 
     platforms: {
@@ -41,7 +40,7 @@ export async function initProject(directory: string = '.'): Promise<void> {
   console.log(`✅ Created configuration file: ${configPath}`);
   
   console.log('\n📋 Next steps:');
-  console.log('  1. Edit pixel-forge.config.json with your app details');
-  console.log('  2. Run: npx pixel-forge generate ./logo.png --all');
-  console.log('  3. Add the generated meta tags to your HTML');
+  console.log('  1. Run: npx pixel-forge generate ./logo.png --all');
+  console.log('  2. Customize the generated meta tags with your app details');
+  console.log('  3. Add the meta tags to your HTML <head> section');
 }

@@ -8,6 +8,9 @@ export * from './generators/web';
 export * from './generators/pwa';
 export * from './generators/favicon';
 
+// Simple API for easy usage (recommended for most users)
+export * from './api';
+
 /**
  * Default export for convenience
  */
