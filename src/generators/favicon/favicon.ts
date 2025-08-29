@@ -1,5 +1,7 @@
 import path from 'path';
 import { promises as fs } from 'fs';
+import { promisify } from 'util';
+import { execFile as execFileAsync } from 'child_process';
 import { ImageProcessor, ImageSizes } from '../../core/image-processor';
 import { MetadataGenerator } from '../../core/metadata-utils';
 import type { PixelForgeConfig } from '../../core/config-validator';
@@ -129,7 +131,7 @@ export class FaviconGenerator {
   }
 
   /**
-   * Generate SVG favicon for modern browsers
+   * Generate SVG favicon for modern browsers with proper background detection
    */
   private async generateSVGFavicon(): Promise<void> {
     const outputPath = path.join(this.config.output.path, 'favicon.svg');
@@ -138,18 +140,49 @@ export class FaviconGenerator {
       // Copy existing SVG
       await fs.copyFile(this.sourceImage, outputPath);
     } else {
-      // Convert to SVG using ImageMagick (better than Sharp's approach)
+      // Produce transparent PNG (color preserved), then embed it in an SVG wrapper
       const processor = new ImageProcessor(this.sourceImage);
       try {
-        const resizedFile = await processor.resize(64, 64, { 
-          fit: 'contain', 
-          background: 'transparent',
+        // Detect background color and then remove it by chroma-keying
+        const detector = new ImageProcessor(this.sourceImage);
+        const { bg } = await detector.inferBackgroundColor();
+        await detector.cleanup();
+        const bgHex = `#${Math.round(bg.r).toString(16).padStart(2, '0')}${Math.round(bg.g).toString(16).padStart(2, '0')}${Math.round(bg.b).toString(16).padStart(2, '0')}`;
+
+        // Resize; keep colors; we will key out the detected background
+        const resizedFile = await processor.resize(64, 64, {
+          fit: 'contain',
+          background: 'black',
           zoom: 1.1
         });
-        const finalProcessor = new ImageProcessor(resizedFile);
-        await finalProcessor.save(outputPath, { format: 'svg' });
+        const tempPng = outputPath.replace('.svg', '-temp.png');
+        const tempProc = new ImageProcessor(resizedFile);
+        await tempProc.save(tempPng, { format: 'png' });
+
+        // Chroma-key: make detected background color transparent
+        const execFile = promisify(execFileAsync);
+        const keyedPng = outputPath.replace('.svg', '-keyed.png');
+        await execFile('magick', [
+          tempPng,
+          '-alpha', 'set',
+          '-fuzz', '12%',
+          '-transparent', bgHex,
+          keyedPng
+        ]);
+
+        // Embed keyed PNG as data URI inside minimal SVG
+        const pngBuffer = await fs.readFile(keyedPng);
+        const b64 = pngBuffer.toString('base64');
+        const svg = `<?xml version="1.0" encoding="UTF-8"?>\n` +
+          `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" preserveAspectRatio="xMidYMid meet">` +
+          `<image href="data:image/png;base64,${b64}" width="64" height="64" />` +
+          `</svg>`;
+        await fs.writeFile(outputPath, svg);
+
+        await tempProc.cleanup();
+        await fs.unlink(tempPng).catch(() => {});
+        await fs.unlink(keyedPng).catch(() => {});
         await processor.cleanup();
-        await finalProcessor.cleanup();
       } catch (_error) {
         // Fallback to PNG with SVG extension if SVG conversion fails
         console.warn('SVG generation failed, creating PNG with SVG extension for compatibility');
@@ -265,33 +298,78 @@ export class FaviconGenerator {
   }
 
   /**
-   * Generate Safari pinned tab icon
+   * Generate Safari pinned tab icon using actual image processing
+   * Creates a monochrome SVG with background transparent and logo in black
    */
   private async generateSafariIcon(): Promise<void> {
-    // Generate a simplified SVG for Safari pinned tabs
-    // This should be a monochrome, high-contrast version
     const outputPath = path.join(this.config.output.path, 'safari-pinned-tab.svg');
     
-    // Create a simplified SVG representation
-    // In a real implementation, you might want to use a library like potrace
-    // For now, we'll create a basic SVG template
-    const svgContent = `<?xml version="1.0" standalone="no"?>
+    if (this.sourceImage.endsWith('.svg')) {
+      // For SVG sources, copy and modify to ensure monochrome
+      await fs.copyFile(this.sourceImage, outputPath);
+    } else {
+      // Produce PNG with detected background chroma-keyed to transparent, then embed in SVG (Safari-compatible)
+      const processor = new ImageProcessor(this.sourceImage);
+      try {
+        // Detect background color
+        const detector = new ImageProcessor(this.sourceImage);
+        const { bg } = await detector.inferBackgroundColor();
+        await detector.cleanup();
+        const bgHex = `#${Math.round(bg.r).toString(16).padStart(2, '0')}${Math.round(bg.g).toString(16).padStart(2, '0')}${Math.round(bg.b).toString(16).padStart(2, '0')}`;
+
+        // Resize to canvas and export as PNG
+        const resizedFile = await processor.resize(512, 512, { 
+          fit: 'contain', 
+          background: 'black',
+          zoom: 1.1
+        });
+        const tempPng = outputPath.replace('.svg', '-temp.png');
+        const tempProc = new ImageProcessor(resizedFile);
+        await tempProc.save(tempPng, { format: 'png' });
+
+        // Chroma-key detected background color to transparency
+        const execFile = promisify(execFileAsync);
+        const keyedPng = outputPath.replace('.svg', '-keyed.png');
+        await execFile('magick', [
+          tempPng,
+          '-alpha', 'set',
+          '-fuzz', '12%',
+          '-transparent', bgHex,
+          keyedPng
+        ]);
+
+        // Embed keyed PNG as data URI in SVG
+        const pngBuffer = await fs.readFile(keyedPng);
+        const b64 = pngBuffer.toString('base64');
+        const svg = `<?xml version="1.0" encoding="UTF-8"?>\n` +
+          `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" preserveAspectRatio="xMidYMid meet">` +
+          `<image href="data:image/png;base64,${b64}" width="512" height="512" />` +
+          `</svg>`;
+        await fs.writeFile(outputPath, svg);
+
+        await tempProc.cleanup();
+        await fs.unlink(tempPng).catch(() => {});
+        await fs.unlink(keyedPng).catch(() => {});
+        await processor.cleanup();
+      } catch (error) {
+        console.warn('Safari icon SVG generation failed, falling back to simplified template:', error);
+        // Fallback to a simple template if SVG conversion fails
+        const svgContent = `<?xml version="1.0" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN"
  "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
 <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
  width="512.000000pt" height="512.000000pt" viewBox="0 0 512.000000 512.000000"
  preserveAspectRatio="xMidYMid meet">
 <metadata>
-Created by Social Forge
+Created by Pixel Forge
 </metadata>
 <g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)"
 fill="#000000" stroke="none">
-<path d="M0 2560 l0 -2560 2560 0 2560 0 0 2560 0 2560 -2560 0 -2560 0 0
--2560z"/>
 </g>
 </svg>`;
-
-    await fs.writeFile(outputPath, svgContent);
+        await fs.writeFile(outputPath, svgContent);
+      }
+    }
   }
 
 

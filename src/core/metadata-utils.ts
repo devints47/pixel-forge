@@ -82,8 +82,7 @@ export class MetadataGenerator {
    */
   getPWAMetaTags(options: MetadataOptions = {}): string[] {
     const {
-      title = this.config.appName,
-      description = this.config.description
+      title = this.config.appName
     } = options;
 
     return [
