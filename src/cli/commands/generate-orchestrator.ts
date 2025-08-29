@@ -1,10 +1,11 @@
 import { generateAll } from './generate-all';
 import { generateWebPackage, generateFaviconOnly, generatePWAOnly, generateSEOOnly } from './generate-web';
-import { generateComprehensiveSocial, generateSpecificSocial, type SocialOptions } from './generate-social';
+import { generateComprehensiveSocial } from './generate-social';
 import type { PixelForgeConfig } from '../../core/config-validator';
 import { getProgressTracker, resetProgressTracker } from '../utils/progress-tracker';
+import { SmartMetadataGenerator } from '../../core/smart-metadata-generator';
 
-export interface GenerateOptions extends SocialOptions {
+export interface GenerateOptions {
   all?: boolean;
   social?: boolean;
   favicon?: boolean;
@@ -29,20 +30,20 @@ export async function generateAssets(
   config: PixelForgeConfig,
   options: GenerateOptions
 ): Promise<void> {
-  // Initialize and start progress tracker
+  // Handle --all flag separately (it manages its own progress tracking)
+  if (options.all) {
+    await generateAll(sourceImage, config, {
+      format: options.format,
+      verbose: options.verbose
+    });
+    return;
+  }
+
+  // Initialize and start progress tracker for non-all commands
   resetProgressTracker();
   const progressTracker = getProgressTracker();
   
   try {
-    // Handle --all flag separately (it manages its own progress tracking)
-    if (options.all) {
-      await generateAll(sourceImage, config, {
-        format: options.format,
-        verbose: options.verbose
-      });
-      return;
-    }
-
     await progressTracker.start(options, config.output.path);
 
     // Collect all results
@@ -54,18 +55,7 @@ export async function generateAssets(
       results.push(...socialResults);
     }
 
-  // Handle specific social media platforms
-  const hasSpecificSocialOptions = options.facebook || options.twitter || options.linkedin || 
-    options.instagram || options.tiktok || options.whatsapp || options.youtube || 
-    options.pinterest || options.imessage || options.discord || options.telegram || 
-    options.signal || options.slack || options.androidrcs || options.snapchat || 
-    options.threads || options.bluesky || options.mastodon || options.messaging || 
-    options.platforms;
-
-    if (hasSpecificSocialOptions) {
-      const socialResults = await generateSpecificSocial(sourceImage, config, options);
-      results.push(...socialResults);
-    }
+    // Note: Individual platform options removed - only essential social generation available
 
     // Handle web development packages
     if (options.web) {
@@ -104,6 +94,16 @@ export async function generateAssets(
     // Complete progress tracking
     const totalFiles = results.reduce((sum, { files }) => sum + files.length, 0);
     await progressTracker.complete(totalFiles);
+
+    // Always generate meta tags for generated files
+    const allGeneratedFiles = results.flatMap(({ files }) => files);
+    const metadataGenerator = new SmartMetadataGenerator(config, {
+      generatedFiles: allGeneratedFiles,
+      outputDir: config.output.path,
+      urlPrefix: config.output.prefix || '/images/'
+    });
+
+    await metadataGenerator.saveToFile(config.output.path);
 
     // Display summary
     console.log('✅ Generation complete!\n');

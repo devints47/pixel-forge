@@ -1,19 +1,18 @@
-import { FaviconGenerator } from './generators/favicon';
-import { PWAGenerator } from './generators/pwa';
-import { WebSEOGenerator } from './generators/web';
-import { generateComprehensiveSocial, generateSpecificSocial } from './cli/commands/generate-social';
-import { generatePlatforms } from './generators/social/platforms/factory';
-import { generateMessaging } from './generators/social/messaging/factory';
+import { generateAssets as cliGenerateAssets, type GenerateOptions } from './cli/commands/generate-orchestrator';
+import { generateAll as cliGenerateAll } from './cli/commands/generate-all';
 import type { PixelForgeConfig } from './core/config-validator';
+import { SmartMetadataGenerator } from './core/smart-metadata-generator';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 /**
- * Modern API that mirrors CLI flags with plug-and-play metadata generation
- * Designed for maximum ease of use and SEO best practices
+ * Modern API that mirrors CLI functionality with automatic meta tag generation
  */
 
 export interface PixelForgeOptions {
   // Basic settings
   outputDir?: string;
+  urlPrefix?: string;
   
   // Main generators (mirrors CLI flags)
   all?: boolean;
@@ -23,34 +22,7 @@ export interface PixelForgeOptions {
   web?: boolean;
   seo?: boolean;
   
-  // Social platform specifics
-  platforms?: boolean;
-  messaging?: boolean;
-  
-  // Individual platforms (like CLI flags)
-  facebook?: boolean;
-  twitter?: boolean;
-  linkedin?: boolean;
-  instagram?: boolean;
-  tiktok?: boolean;
-  snapchat?: boolean;
-  threads?: boolean;
-  whatsapp?: boolean;
-  youtube?: boolean;
-  pinterest?: boolean;
-  bluesky?: boolean;
-  mastodon?: boolean;
-  
-  // Messaging apps
-  discord?: boolean;
-  telegram?: boolean;
-  signal?: boolean;
-  slack?: boolean;
-  imessage?: boolean;
-  androidrcs?: boolean;
-  
-  // Metadata generation
-  generateMetadata?: boolean; // Returns plug-and-play HTML meta tags
+  // Note: Individual platform options removed - only essential social generation available
   
   // Output options
   format?: 'png' | 'jpeg' | 'webp';
@@ -59,6 +31,10 @@ export interface PixelForgeOptions {
 }
 
 export interface PixelForgeResult {
+  // All generated image files
+  images: string[];
+  
+  // Generated asset files organized by type  
   files: {
     favicon?: string[];
     pwa?: string[];
@@ -66,305 +42,206 @@ export interface PixelForgeResult {
     web?: string[];
     seo?: string[];
   };
-  metadata?: {
-    html: string;           // Ready-to-use HTML meta tags
-    favicon: string[];      // Favicon-specific meta tags
-    pwa: string[];          // PWA manifest and meta tags
-    social: string[];       // OpenGraph and Twitter Card meta tags
-    apple: string[];        // Apple-specific meta tags
-    android: string[];      // Android-specific meta tags
-    windows: string[];      // Windows/Microsoft meta tags
+  
+  // Meta tags (always generated)
+  metaTags: {
+    html: string;                    // Complete HTML content from meta-tags.html
+    filePath: string;                // Path to meta-tags.html file
+    tags: string[];                  // Array of individual meta tag strings
   };
+  
+  // Special files
+  manifest?: string;               // Path to manifest.json if generated
+  
+  // Summary information
   summary: {
-    totalFiles: number;
-    generatedAssets: string[];
-    outputDirectory: string;
+    totalFiles: number;            // Total files generated (including meta-tags.html)
+    totalImages: number;           // Total image files generated
+    outputDirectory: string;       // Where files were saved
+    generatedAssets: string[];     // All generated file names
   };
 }
 
 /**
- * Creates a config from the modern options
+ * Creates a PixelForge config from API options
  */
 function createConfig(imagePath: string, options: PixelForgeOptions = {}): PixelForgeConfig {
-  const {
-    outputDir = './assets',
-    format = 'png',
-    quality = 90
-  } = options;
-
+  const outputDir = options.outputDir || './assets';
+  
   return {
-    appName: 'Generated Asset',  // Simple placeholder for metadata
-    description: 'Boilerplate image assets for web applications',  // Simple placeholder
-    themeColor: '#007bff',  // Hardcoded sensible default
-    backgroundColor: '#ffffff',  // Hardcoded sensible default
+    appName: 'Generated Asset',
+    description: 'Boilerplate image assets for web applications',
+    themeColor: '#007bff',
+    backgroundColor: '#ffffff',
     output: {
       path: outputDir,
-      quality,
-      format
+      prefix: options.urlPrefix || '/images/',
+      quality: options.quality || 90
     },
     socialPreview: {
       template: 'basic'
-      // No title/description to avoid text overlays on images
-    },
-    platforms: {
-      social: true,
-      favicon: true,
-      pwa: true,
-      apple: true,
-      android: true,
-      windows: true
     }
   };
 }
 
 /**
- * Generates HTML meta tags for all generated assets
+ * Reads meta-tags.html and parses it into structured format
  */
-function generateMetaTags(
-  faviconGenerator: FaviconGenerator | undefined,
-  pwaGenerator: PWAGenerator | undefined,
-  webGenerator: WebSEOGenerator | undefined,
-  socialFiles: string[],
-  config: PixelForgeConfig
-): PixelForgeResult['metadata'] {
-  const favicon = faviconGenerator?.getMetaTags() || [];
-  const pwa = pwaGenerator?.getMetaTags() || [];
-  const web = webGenerator?.getMetaTags() || [];
-  
-  // Generate social media meta tags
-  const social: string[] = [];
-  const baseUrl = ''; // Users can replace this with their domain
-  
-  // Basic OpenGraph tags (placeholder values - users should customize)
-  social.push(`<meta property="og:title" content="Your App Name" />`);
-  social.push(`<meta property="og:description" content="Your app description" />`);
-  social.push(`<meta property="og:type" content="website" />`);
-  
-  // Add social media images
-  if (socialFiles.includes('social-media-general.png')) {
-    social.push(`<meta property="og:image" content="${baseUrl}/social-media-general.png" />`);
-    social.push(`<meta property="og:image:width" content="1200" />`);
-    social.push(`<meta property="og:image:height" content="630" />`);
+async function parseMetaTagsFile(filePath: string): Promise<{ html: string; tags: string[] }> {
+  try {
+    const content = await fs.readFile(filePath, 'utf8');
+    
+    // Extract just the meta tags from the HTML
+    const metaTagMatches = content.match(/<(?:meta|link)[^>]*>/g) || [];
+    const tags = metaTagMatches.filter(tag => 
+      !tag.includes('<!-- ') && tag.trim().length > 0
+    );
+    
+    return {
+      html: content,
+      tags
+    };
+  } catch (error) {
+    return {
+      html: '',
+      tags: []
+    };
   }
-  
-  // Twitter Card tags (placeholder values - users should customize)
-  social.push(`<meta name="twitter:card" content="summary_large_image" />`);
-  social.push(`<meta name="twitter:title" content="Your App Name" />`);
-  social.push(`<meta name="twitter:description" content="Your app description" />`);
-  if (socialFiles.includes('twitter-image.png')) {
-    social.push(`<meta name="twitter:image" content="${baseUrl}/twitter-image.png" />`);
-  }
-  
-  // Apple-specific meta tags (placeholder values - users should customize)
-  const apple: string[] = [];
-  apple.push(`<meta name="apple-mobile-web-app-title" content="Your App Name" />`);
-  apple.push(`<meta name="apple-mobile-web-app-capable" content="yes" />`);
-  apple.push(`<meta name="apple-mobile-web-app-status-bar-style" content="default" />`);
-  if (favicon.some(tag => tag.includes('apple-touch-icon'))) {
-    apple.push(`<link rel="apple-touch-icon" href="${baseUrl}/apple-touch-icon.png" />`);
-  }
-  
-  // Android-specific meta tags
-  const android: string[] = [];
-  android.push(`<meta name="mobile-web-app-capable" content="yes" />`);
-  android.push(`<meta name="theme-color" content="#007bff" />`);
-  
-  // Windows-specific meta tags
-  const windows: string[] = [];
-  windows.push(`<meta name="msapplication-TileColor" content="#007bff" />`);
-  windows.push(`<meta name="msapplication-config" content="${baseUrl}/browserconfig.xml" />`);
-  
-  // Combine all meta tags into a single HTML string
-  const allTags = [...favicon, ...pwa, ...web, ...social, ...apple, ...android, ...windows];
-  const html = allTags.join('\n');
-  
-  return {
-    html,
-    favicon,
-    pwa,
-    social,
-    apple,
-    android,
-    windows
-  };
 }
 
 /**
  * 🚀 Main API function that mirrors CLI functionality
  * This is the primary function you should use - it supports all CLI flags and options
+ * Meta tags are ALWAYS generated automatically
  */
-export async function generate(imagePath: string, options: PixelForgeOptions = {}): Promise<PixelForgeResult> {
+export async function generateAssets(imagePath: string, options: PixelForgeOptions = {}): Promise<PixelForgeResult> {
   const config = createConfig(imagePath, options);
-  const result: PixelForgeResult = {
-    files: {},
-    summary: {
-      totalFiles: 0,
-      generatedAssets: [],
-      outputDirectory: config.output.path
-    }
+  
+  // Convert API options to CLI options
+  const cliOptions: GenerateOptions = {
+    all: options.all,
+    social: options.social,
+    favicon: options.favicon,
+    pwa: options.pwa,
+    web: options.web,
+    seo: options.seo,
+    format: options.format as any,
+    verbose: options.verbose
   };
 
-  let faviconGenerator: FaviconGenerator | undefined;
-  let pwaGenerator: PWAGenerator | undefined;
-  let webGenerator: WebSEOGenerator | undefined;
-  const allSocialFiles: string[] = [];
-
-  // Handle --all flag
+  // Use the CLI generate functions (they automatically generate meta tags)
   if (options.all) {
-    // Generate everything
-    faviconGenerator = new FaviconGenerator(imagePath, config);
-    await faviconGenerator.generate();
-    result.files.favicon = faviconGenerator.getGeneratedFiles();
-
-    pwaGenerator = new PWAGenerator(imagePath, config);
-    await pwaGenerator.generate();
-    result.files.pwa = pwaGenerator.getGeneratedFiles();
-
-    webGenerator = new WebSEOGenerator(imagePath, config);
-    await webGenerator.generate();
-    result.files.web = webGenerator.getGeneratedFiles();
-
-    const socialResults = await generateComprehensiveSocial(imagePath, config);
-    result.files.social = socialResults.flatMap((r: any) => r.files);
-    allSocialFiles.push(...(result.files.social || []));
+    await cliGenerateAll(imagePath, config, {
+      format: options.format as any,
+      verbose: options.verbose
+    });
   } else {
-    // Handle individual flags
-
-    // Favicon generation
-    if (options.favicon) {
-      faviconGenerator = new FaviconGenerator(imagePath, config);
-      await faviconGenerator.generate();
-      result.files.favicon = faviconGenerator.getGeneratedFiles();
-    }
-
-    // PWA generation
-    if (options.pwa) {
-      pwaGenerator = new PWAGenerator(imagePath, config);
-      await pwaGenerator.generate();
-      result.files.pwa = pwaGenerator.getGeneratedFiles();
-    }
-
-    // Web/SEO generation
-    if (options.web || options.seo) {
-      webGenerator = new WebSEOGenerator(imagePath, config);
-      await webGenerator.generate();
-      result.files.web = webGenerator.getGeneratedFiles();
-    }
-
-    // Social media generation
-    if (options.social) {
-      const socialResults = await generateComprehensiveSocial(imagePath, config);
-      result.files.social = socialResults.flatMap((r: any) => r.files);
-      allSocialFiles.push(...(result.files.social || []));
-    }
-
-    // Individual platform generation
-    const hasSpecificPlatforms = options.facebook || options.twitter || options.linkedin || 
-      options.instagram || options.tiktok || options.snapchat || options.threads || 
-      options.whatsapp || options.youtube || options.pinterest || options.bluesky || 
-      options.mastodon || options.discord || options.telegram || options.signal || 
-      options.slack || options.imessage || options.androidrcs;
-
-    if (hasSpecificPlatforms) {
-      const socialResults = await generateSpecificSocial(imagePath, config, options);
-      const socialFiles = socialResults.flatMap((r: any) => r.files);
-      result.files.social = [...(result.files.social || []), ...socialFiles];
-      allSocialFiles.push(...socialFiles);
-    }
-
-    // Platform groups
-    if (options.platforms) {
-      const platformResults = await generatePlatforms(imagePath, config, {
-        facebook: true,
-        twitter: true,
-        linkedin: true,
-        instagram: true,
-        tiktok: true,
-        snapchat: true,
-        threads: true,
-        youtube: true,
-        pinterest: true,
-        bluesky: true,
-        mastodon: true
-      });
-      const platformFiles = platformResults.flatMap((r: any) => r.files);
-      result.files.social = [...(result.files.social || []), ...platformFiles];
-      allSocialFiles.push(...platformFiles);
-    }
-
-    if (options.messaging) {
-      const messagingResults = await generateMessaging(imagePath, config, {
-        discord: true,
-        telegram: true,
-        signal: true,
-        slack: true,
-        imessage: true,
-        androidrcs: true
-      });
-      const messagingFiles = messagingResults.flatMap((r: any) => r.files);
-      result.files.social = [...(result.files.social || []), ...messagingFiles];
-      allSocialFiles.push(...messagingFiles);
-    }
+    await cliGenerateAssets(imagePath, config, cliOptions);
   }
 
-  // Generate metadata if requested
-  if (options.generateMetadata) {
-    result.metadata = generateMetaTags(
-      faviconGenerator,
-      pwaGenerator,
-      webGenerator,
-      allSocialFiles,
-      config
+  // Read generated files
+  const allFiles = await fs.readdir(config.output.path);
+  const imageFiles = allFiles.filter(file => 
+    /\.(png|jpg|jpeg|webp|svg)$/i.test(file)
+  );
+  const iconFile = allFiles.find(file => file.endsWith('.ico'));
+  if (iconFile) imageFiles.push(iconFile);
+  
+  // Parse meta tags file
+  const metaTagsPath = path.join(config.output.path, 'meta-tags.html');
+  const metaTags = await parseMetaTagsFile(metaTagsPath);
+  
+  // Check for manifest
+  const manifestPath = allFiles.find(file => file === 'manifest.json');
+  
+  // Organize files by type (basic categorization)
+  const files: PixelForgeResult['files'] = {};
+  
+  if (options.favicon || options.web || options.all) {
+    files.favicon = imageFiles.filter(file => 
+      file.includes('favicon') || file.includes('apple-touch') || file.includes('safari')
+    );
+  }
+  
+  if (options.pwa || options.web || options.all) {
+    files.pwa = allFiles.filter(file => 
+      file.includes('pwa-') || file.includes('splash-') || file === 'manifest.json'
+    );
+  }
+  
+  if (options.social || options.seo || options.web || options.all) {
+    files.social = imageFiles.filter(file => 
+      file.includes('social-') || file.includes('og-') || file.includes('twitter-') || 
+      file.includes('instagram-') || file.includes('opengraph')
     );
   }
 
-  // Calculate summary
-  const allFiles = Object.values(result.files).flat();
-  result.summary.totalFiles = allFiles.length;
-  result.summary.generatedAssets = allFiles;
+  const result: PixelForgeResult = {
+    images: imageFiles,
+    files,
+    metaTags: {
+      html: metaTags.html,
+      filePath: metaTagsPath,
+      tags: metaTags.tags
+    },
+    manifest: manifestPath ? path.join(config.output.path, manifestPath) : undefined,
+    summary: {
+      totalFiles: allFiles.length,
+      totalImages: imageFiles.length,
+      outputDirectory: config.output.path,
+      generatedAssets: allFiles
+    }
+  };
 
   return result;
 }
 
-// Legacy functions for backwards compatibility
-export async function generateAll(imagePath: string, options: PixelForgeOptions = {}) {
-  return generate(imagePath, { ...options, all: true });
+// Convenience functions that mirror CLI behavior
+export async function generateAll(imagePath: string, options: Omit<PixelForgeOptions, 'all'> = {}) {
+  return generateAssets(imagePath, { ...options, all: true });
 }
 
 export async function generateFavicons(imagePath: string, outputDir: string = './assets') {
-  const result = await generate(imagePath, { favicon: true, outputDir });
-  return result.files.favicon || [];
+  const result = await generateAssets(imagePath, { favicon: true, outputDir });
+  return {
+    files: result.files.favicon || [],
+    metaTags: result.metaTags,
+    summary: result.summary
+  };
 }
 
 export async function generatePWA(imagePath: string, outputDir: string = './assets') {
-  const result = await generate(imagePath, { 
-    pwa: true, 
-    outputDir,
-    generateMetadata: true 
-  });
+  const result = await generateAssets(imagePath, { pwa: true, outputDir });
   return {
     files: result.files.pwa || [],
-    manifest: result.metadata?.pwa || []
+    manifest: result.manifest,
+    metaTags: result.metaTags,
+    summary: result.summary
   };
 }
 
 export async function generateSocial(imagePath: string, outputDir: string = './assets') {
-  const result = await generate(imagePath, { 
-    social: true, 
-    outputDir
-  });
-  return result.files.social || [];
+  const result = await generateAssets(imagePath, { social: true, outputDir });
+  return {
+    files: result.files.social || [],
+    metaTags: result.metaTags,
+    summary: result.summary
+  };
 }
 
 export async function generateWeb(imagePath: string, outputDir: string = './assets') {
-  const result = await generate(imagePath, { web: true, outputDir });
-  return result.files.web || [];
+  const result = await generateAssets(imagePath, { web: true, outputDir });
+  return {
+    files: {
+      favicon: result.files.favicon || [],
+      pwa: result.files.pwa || [],
+      social: result.files.social || []
+    },
+    metaTags: result.metaTags,
+    manifest: result.manifest,
+    summary: result.summary
+  };
 }
 
-export async function generateQuick(imagePath: string, outputDir: string = './assets') {
-  return generate(imagePath, { 
-    all: true, 
-    outputDir,
-    generateMetadata: true 
-  });
-}
+// Export the main function as default
+export default generateAssets;
