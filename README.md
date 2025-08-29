@@ -3,7 +3,7 @@
 <div align="center">
   <img width="225" height="225" alt="Pixel Forge Logo Transparent" src="https://github.com/user-attachments/assets/19e54310-ce12-4dd1-9db5-46c11319e8a9" />
 
-  **Drop your logo, get professional website assets.**
+  **Drop in your logo, get essential website assets.**
   
   *Stop wrestling with image sizes. Start focusing on your content.*
 
@@ -12,11 +12,11 @@
   [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 </div>
 
-**Pixel Forge** generates everything your website needs for modern web sharing: favicons, PWA icons, OpenGraph images, and SEO assets. One image in, professional boilerplate assets out.
+**Pixel Forge** generates **only the essential assets** your website needs for modern web sharing. Optimized for 2024 SEO best practices - no bloat, no over-generation.
 
 ✨ **Auto-detects background colors** for perfect image extension  
 🚀 **Zero configuration** - just provide your logo  
-📱 **Complete coverage** - works everywhere your site gets shared  
+📱 **Essential files only** - 5 favicons, 7 PWA assets, smart meta tags  
 ⚡ **Built with ImageMagick** for rock-solid reliability  
 
 ## 🚀 Quick Start
@@ -43,219 +43,170 @@ choco install imagemagick
 npx pixel-forge generate logo.png --all
 ```
 
-This creates **48 professional assets** in the `./public/images` folder:
-- 🌍 **OpenGraph images** for Facebook, Twitter, LinkedIn, and general sharing
-- 🏠 **Favicons** in all sizes and formats (ICO, PNG, SVG, Apple Touch)
-- 📱 **PWA assets** including manifest.json and splash screens
+This creates **19 essential assets** in the `./generated` folder:
+- 🌍 **Social media images** (3 essential formats: landscape, square, vertical)
+- 🏠 **Favicons** (5 essential files: ICO, PNG, SVG, Apple Touch, Safari)
+- 📱 **PWA assets** (7 essential files: manifest + core icons)
 - 🔍 **SEO assets** for complete web coverage
 
-## 📦 What Gets Generated
+### Automatic Meta Tags
 
-| Flag | Description | Files |
-|------|-------------|-------|
-| `--all` | Everything your website needs | 48 total files |
-| `--favicon` | Browser icons and favicons | 20 files |
-| `--pwa` | Progressive web app assets | 39 files |
-| `--social` | Social media OpenGraph images | 12 files |
-| `--web` | Complete package (favicon + PWA + social) | 65 files |
+```bash
+# Meta tags are ALWAYS generated automatically
+npx pixel-forge generate logo.png --favicon
+```
 
-### Quick Examples
+**Every generation automatically creates** a `meta-tags.html` file with copy-paste ready HTML tags that reference only the files you generated.
+
+## 📂 What Gets Generated
+
+### `--favicon` (5 essential files)
+```
+favicon.ico              # Legacy browser support
+favicon-32x32.png        # Modern browsers
+favicon.svg              # Scalable vector icon
+apple-touch-icon.png     # iOS home screen (180x180)
+safari-pinned-tab.svg    # Safari pinned tabs
+```
+
+### `--pwa` (7 essential files)
+```
+manifest.json                           # PWA configuration
+pwa-192x192.png                         # Required PWA icon
+pwa-512x512.png                         # Required PWA icon
+pwa-maskable-192x192.png                # Android adaptive icon
+pwa-maskable-512x512.png                # Android adaptive icon
+splash-android-portrait-1080x1920.png   # Generic mobile splash
+splash-android-landscape-1920x1080.png  # Generic mobile splash
+```
+
+### `--social` (3 essential files)
+```
+social-media-general.png    # 1200x630 - Facebook, Twitter, LinkedIn, messaging
+instagram-square.png        # 1080x1080 - Instagram, Threads, profile images  
+social-vertical.png         # 1080x1920 - TikTok, Stories, Snapchat
+```
+
+### `--seo` (3-6 files)
+```
+og-image.png           # OpenGraph social sharing
+opengraph.png          # Facebook/LinkedIn
+twitter-image.png      # Twitter Cards
+```
+
+### Always Generated
+```
+meta-tags.html         # Copy-paste ready HTML tags (ALWAYS created)
+```
+
+## 🛠️ Usage Examples
+
+### Specific Generations
 
 ```bash
 # Just favicons
 npx pixel-forge generate logo.png --favicon
 
-# Just social media images  
-npx pixel-forge generate logo.png --social
-
-# PWA-ready assets
+# PWA assets only
 npx pixel-forge generate logo.png --pwa
 
-# Complete web package
-npx pixel-forge generate logo.png --web
+# Social sharing images
+npx pixel-forge generate logo.png --seo
 
-# Everything + metadata
-npx pixel-forge generate logo.png --all
-npx pixel-forge meta logo.png > meta-tags.html
+# Complete web package (favicon + PWA + SEO)
+npx pixel-forge generate logo.png --web
 ```
 
-## 🌍 Social Media Coverage
+### Output Options
 
-**Works everywhere your website gets shared:**
+```bash
+# Custom output directory
+npx pixel-forge generate logo.png --all --output ./assets
 
-| Platform | Image Size | Generated File |
-|----------|------------|----------------|
-| **Facebook** | 1200×630 | `social-media-general.png` |
-| **Twitter/X** | 1200×600 | `twitter-image.png` |
-| **LinkedIn** | 1200×627 | `linkedin-share.png` + `linkedin-company.png` |
-| **Instagram** | 1200×630 | `social-media-general.png` |
-| **Discord** | 1200×630 | `social-media-general.png` |
-| **WhatsApp** | 1200×630 | `social-media-general.png` |
-| **Telegram** | 1200×630 | `social-media-general.png` |
-| **TikTok** | 1200×630 | `tiktok.png` |
-| **Snapchat** | 1200×630 | `snapchat.png` |
-| **YouTube** | Multiple sizes | `youtube-thumbnail.png` + `youtube-shorts.png` |
-| **Pinterest** | Multiple sizes | `pinterest-pin.png` + `pinterest-square.png` |
+# Custom URL prefix for meta tags
+npx pixel-forge generate logo.png --favicon --prefix "/assets/"
+```
 
-*Plus Threads, Bluesky, Mastodon, Signal, Slack, iMessage, and Android RCS*
-
-## 🔧 Programmatic Usage
+## 🧩 Programmatic API
 
 ```typescript
-import { generate } from 'pixel-forge';
+import { generateAssets } from 'pixel-forge';
 
-// Generate everything with metadata
-const result = await generate('./logo.png', {
-  all: true,
-  generateMetadata: true,
-  outputDir: './public/assets'
+// Generate favicon assets (meta tags always included)
+const result = await generateAssets('logo.png', {
+  favicon: true,
+  outputDir: './generated'
 });
 
-// Get ready-to-use HTML meta tags
-console.log(result.metadata?.html);
-// Outputs: <meta property="og:image" content="/social-media-general.png" />
-//          <meta name="twitter:image" content="/twitter-image.png" />
-//          <link rel="icon" href="/favicon.ico" />
-//          ... and 20+ more essential tags
-```
-
-### Individual Generators
-
-```typescript
-// Just favicons
-const faviconResult = await generate('./logo.png', { favicon: true });
-
-// Just social media
-const socialResult = await generate('./logo.png', { social: true });
-
-// Just PWA assets
-const pwaResult = await generate('./logo.png', { pwa: true });
+// Access the structured result
+console.log(result.files.favicon);    // Array of favicon file paths
+console.log(result.metaTags.html);    // Complete HTML from meta-tags.html
+console.log(result.metaTags.tags);    // Array of individual meta tags
+console.log(result.summary);          // Generation summary
 ```
 
 ## 🎯 Why Pixel Forge?
 
-### ✅ **Zero Configuration**
-- No colors to configure (auto-detected from your image)
-- No app names or descriptions required (generates boilerplate)
-- No complex setup - just provide your logo
+### Before: Bloated & Complex
+- ❌ 40+ unnecessary files
+- ❌ Complex configuration  
+- ❌ References to non-existent files
+- ❌ Platform-specific variations you don't need
 
-### ✅ **Professional Results**
-- Clean images without text overlays
-- Proper transparency handling
-- Perfect dimensions for each platform
-- SEO-optimized file names
-
-### ✅ **Complete Coverage**
-- Every favicon size you'll ever need
-- PWA-ready with manifest.json
-- OpenGraph images for 15+ platforms
-- Ready for modern web deployment
-
-### ✅ **Developer-Friendly**
-- TypeScript support
-- Framework agnostic
-- Ready-to-use HTML meta tags
-- Next.js helpers included
-
-## 📝 HTML Integration
-
-Copy the generated meta tags directly into your HTML:
-
-```html
-<!-- Essential meta tags (customize the content values) -->
-<meta property="og:title" content="Your App Name" />
-<meta property="og:description" content="Your app description" />
-<meta property="og:image" content="/images/social-media-general.png" />
-
-<!-- Twitter Cards -->
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:image" content="/images/twitter-image.png" />
-
-<!-- Favicons -->
-<link rel="icon" href="/images/favicon.ico" sizes="any">
-<link rel="icon" href="/images/favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/images/apple-touch-icon.png">
-
-<!-- PWA -->
-<link rel="manifest" href="/images/manifest.json">
-```
-
-## 📱 Next.js Integration
-
-```typescript
-// app/layout.tsx
-import type { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: 'Your App Name',
-  description: 'Your app description',
-  icons: {
-    icon: [
-      { url: '/images/favicon.ico', sizes: 'any' },
-      { url: '/images/favicon-32x32.png', sizes: '32x32' },
-    ],
-    apple: [{ url: '/images/apple-touch-icon.png' }],
-  },
-  openGraph: {
-    images: ['/images/social-media-general.png'],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    images: ['/images/twitter-image.png'],
-  },
-  manifest: '/images/manifest.json',
-}
-```
-
-## 🛠️ Installation Options
-
-```bash
-# Use directly (recommended)
-npx pixel-forge generate logo.png --all
-
-# Install globally
-npm install -g pixel-forge
-pixel-forge generate logo.png --all
-
-# Install locally
-npm install pixel-forge
-```
+### After: Essential & Clean
+- ✅ **5 favicon files** (down from 20+)
+- ✅ **7 PWA files** (down from 38+)
+- ✅ **Smart meta tags** that reference only generated files
+- ✅ **2024 SEO best practices** compliance
 
 ## 📋 CLI Reference
 
 ```bash
-# Generate specific asset types
-pixel-forge generate logo.png --favicon     # Browser icons
-pixel-forge generate logo.png --pwa         # PWA assets  
-pixel-forge generate logo.png --social      # Social media
-pixel-forge generate logo.png --web         # Everything
+# Basic usage (both commands work identically)
+npx pixel-forge generate <image> [options]
+pf generate <image> [options]  # Short alias
 
-# Individual platforms
-pixel-forge generate logo.png --facebook --twitter
-pixel-forge generate logo.png --messaging   # WhatsApp, Discord, etc.
-pixel-forge generate logo.png --platforms   # TikTok, YouTube, etc.
+# Asset type flags
+--all           # Generate all essential assets (19 files including meta-tags.html)
+--social        # Generate essential social media assets (3 core images + meta-tags.html)
+--favicon       # Generate favicon assets (5 files + meta-tags.html)
+--pwa          # Generate PWA assets (7 files + meta-tags.html) 
+--seo          # Generate SEO/social images (3-6 files + meta-tags.html)
+--web          # Generate web package (favicon + PWA + SEO + meta-tags.html)
 
-# Utilities
-pixel-forge meta logo.png                   # Generate HTML meta tags
-pixel-forge init                             # Create config file
-pixel-forge info                             # Show platform coverage
+# Output options
+--output <dir> # Output directory (default: ./generated)
+--prefix <url> # URL prefix for meta tags (default: /images/)
+--verbose      # Show detailed output
 ```
 
-## 🎨 Perfect for Modern Web Development
+## 🔧 Advanced Features
 
-Pixel Forge is designed for developers who want:
-- **Quick deployment** - Generate everything in one command
-- **SEO optimization** - Proper OpenGraph tags for all platforms  
-- **PWA readiness** - Complete progressive web app setup
-- **Professional results** - Clean, properly-sized assets
-- **Zero maintenance** - Works with any framework, no dependencies
+### Auto Background Detection
+Pixel Forge automatically detects your image's background color and uses it to fill extended areas, preventing ugly white bars or cropping.
+
+### Smart Meta Tags (Always Generated)
+Every generation automatically creates `meta-tags.html` with:
+- ✅ **Only tags for generated files** (no 404s)  
+- ✅ **2025 SEO best practices** compliance
+- ✅ **Copy-paste ready** HTML format
+- ✅ **Security headers** included
+
+### Format Support
+Supports all modern image formats:
+- PNG, JPEG, WebP, AVIF, TIFF, GIF, SVG, BMP
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
-**Made with ❤️ for developers who want their websites to look professional everywhere**
-
-*Drop your logo. Get professional website assets.*
+<div align="center">
+  <strong>Built with ❤️ for modern web development</strong><br>
+  <em>Stop generating bloat. Start generating essentials.</em>
+</div>
