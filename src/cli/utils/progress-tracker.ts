@@ -1,5 +1,7 @@
 import * as cliProgress from 'cli-progress';
 import { promises as fs } from 'fs';
+import path from 'path';
+import { setProgressRecorder } from '../../core/progress-events';
 import { GenerateOptions } from '../commands/generate-orchestrator';
 
 export interface ProgressConfig {
@@ -19,11 +21,13 @@ export class ProgressTracker {
   private outputDirectory = '';
   private pollingInterval: NodeJS.Timeout | null = null;
   private isPolling = false;
+  private usingEvents = false;
+  private createdFiles: Set<string> = new Set();
 
   // File extensions we consider as generated assets
   private readonly assetExtensions = [
     '.png', '.jpg', '.jpeg', '.webp', '.svg', '.ico',
-    '.json', '.xml'
+    '.json', '.xml', '.html'
   ];
 
   /**
@@ -32,28 +36,34 @@ export class ProgressTracker {
   static estimateFileCount(options: GenerateOptions): number {
     let totalFiles = 0;
 
-    // Favicon generation (essential files with multiple sizes)
-    if (options.favicon) {
-      totalFiles += 6; // favicon.ico, favicon-16x16.png, favicon-32x32.png, favicon-48x48.png, apple-touch-icon.png, safari-pinned-tab.svg
+    // If --web flag, it includes favicon + PWA + SEO package
+    if (options.web) {
+      totalFiles += 16; // complete web package (favicons + PWA + SEO images)
+    } else {
+      // Favicon generation (essential files with multiple sizes)
+      if (options.favicon) {
+        totalFiles += 6; // favicon.ico, favicon-16x16.png, favicon-32x32.png, favicon-48x48.png, apple-touch-icon.png, safari-pinned-tab.svg
+      }
+
+      // PWA generation (essential files only)
+      if (options.pwa) {
+        totalFiles += 7; // pwa icons (4) + splash screens (2) + manifest.json (1)
+      }
+
+      // Social media generation (optimized essential files only)
+      if (options.social) {
+        totalFiles += 3; // social-media-general.png, instagram-square.png, social-vertical.png
+      }
+
+      // SEO generation
+      if (options.seo) {
+        totalFiles += 3; // og-image.png, opengraph.png, twitter-image.png
+      }
     }
 
-    // PWA generation (essential files only)
-    if (options.pwa) {
-      totalFiles += 7; // pwa icons (4) + splash screens (2) + manifest.json (1)
-    }
-
-    // Social media generation (optimized essential files only)
-    if (options.social) {
-      totalFiles += 3; // social-media-general.png, instagram-square.png, social-vertical.png
-    }
-
-    // SEO/Web generation
-    if (options.seo || options.web) {
-      totalFiles += 3; // og-image.png, opengraph.png, twitter-image.png
-    }
-
-    // Transparent background generation (single output)
-    if ((options as any).transparent) {
+    // Transparent background generation (single output when used alone)
+    const hasOtherGenerators = !!(options.all || options.web || options.favicon || options.pwa || options.seo || options.social);
+    if ((options as any).transparent && !hasOtherGenerators) {
       totalFiles += 1; // one transparent image
     }
 
@@ -132,9 +142,17 @@ export class ProgressTracker {
     this.totalFiles = ProgressTracker.estimateFileCount(options);
     this.outputDirectory = outputDirectory;
     this.currentProgress = 0;
+    this.createdFiles.clear();
 
-    // Count existing files to use as baseline
-    this.initialFileCount = await this.countAssetFiles(outputDirectory);
+    // Snapshot existing assets per extension for accurate diffing
+    try {
+      const files = await fs.readdir(outputDirectory);
+      this.initialFileCount = files.filter(file => 
+        this.assetExtensions.some(ext => file.toLowerCase().endsWith(ext))
+      ).length;
+    } catch (_err) {
+      this.initialFileCount = 0;
+    }
 
     // Create progress bar with custom format
     this.bar = new cliProgress.SingleBar({
@@ -148,9 +166,22 @@ export class ProgressTracker {
     }, cliProgress.Presets.shades_classic);
 
     this.bar.start(this.totalFiles, 0);
+    // Prefer event-driven updates; disable polling to avoid regressions
+    this.usingEvents = true;
+    setProgressRecorder((filePath: string) => {
+      if (!this.bar) return;
+      const lower = filePath.toLowerCase();
+      if (this.assetExtensions.some(ext => lower.endsWith(ext))) {
+        this.currentProgress = Math.min(this.currentProgress + 1, this.totalFiles);
+        this.bar.update(this.currentProgress);
+        this.createdFiles.add(path.basename(filePath));
+      }
+    });
     
-    // Start monitoring the directory for file changes
-    await this.startPolling();
+    // If events aren't available for some reason, fallback to polling
+    if (!this.usingEvents) {
+      await this.startPolling();
+    }
   }
 
   /**
@@ -159,13 +190,15 @@ export class ProgressTracker {
   async complete(actualFileCount?: number): Promise<void> {
     // Stop polling first
     this.stopPolling();
+    setProgressRecorder(null);
+    this.usingEvents = false;
     
     if (!this.bar) return;
 
     // Get final file count from directory if not provided
     if (!actualFileCount && this.outputDirectory) {
       const finalCount = await this.countAssetFiles(this.outputDirectory);
-      actualFileCount = finalCount - this.initialFileCount;
+      actualFileCount = Math.max(finalCount - this.initialFileCount, 0);
     }
 
     // If actual count is provided and different from estimate, adjust

@@ -21,6 +21,7 @@ export interface PixelForgeOptions {
   pwa?: boolean;
   web?: boolean;
   seo?: boolean;
+  transparent?: boolean;
   
   // Note: Individual platform options removed - only essential social generation available
   
@@ -41,6 +42,7 @@ export interface PixelForgeResult {
     social?: string[];
     web?: string[];
     seo?: string[];
+    transparent?: string[];
   };
   
   // Meta tags (always generated)
@@ -125,6 +127,7 @@ export async function generateAssets(imagePath: string, options: PixelForgeOptio
     pwa: options.pwa,
     web: options.web,
     seo: options.seo,
+    transparent: options.transparent,
     format: options.format as any,
     verbose: options.verbose
   };
@@ -174,6 +177,10 @@ export async function generateAssets(imagePath: string, options: PixelForgeOptio
       file.includes('social-') || file.includes('og-') || file.includes('twitter-') || 
       file.includes('instagram-') || file.includes('opengraph')
     );
+  }
+
+  if (options.transparent) {
+    files.transparent = imageFiles.filter(file => file.includes('transparent'));
   }
 
   const result: PixelForgeResult = {
@@ -239,6 +246,15 @@ export async function generateWeb(imagePath: string, outputDir: string = './asse
     },
     metaTags: result.metaTags,
     manifest: result.manifest,
+    summary: result.summary
+  };
+}
+
+export async function generateTransparent(imagePath: string, outputDir: string = './assets') {
+  const result = await generateAssets(imagePath, { transparent: true, outputDir });
+  return {
+    files: result.files.transparent || [],
+    metaTags: result.metaTags,
     summary: result.summary
   };
 }

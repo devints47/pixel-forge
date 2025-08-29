@@ -312,6 +312,12 @@ export class PWAGenerator {
 
     const manifestPath = path.join(this.config.output.path, 'manifest.json');
     await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2));
+    try {
+      const { emitProgress } = await import('../../core/progress-events');
+      emitProgress(manifestPath);
+    } catch (_err) {
+      // Ignore progress emission failures
+    }
   }
 
   /**
