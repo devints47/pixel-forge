@@ -1,6 +1,7 @@
 import path from 'path';
 import { promises as fs } from 'fs';
 import { ImageProcessor, ImageSizes } from '../../core/image-processor';
+import { MetadataGenerator } from '../../core/metadata-utils';
 import type { PixelForgeConfig } from '../../core/config-validator';
 
 export interface FaviconOptions {
@@ -31,8 +32,8 @@ export class FaviconGenerator {
       includePNG = true,
       includeSVG = true,
       includeApple = true,
-      includeAndroid = true,
-      includeWindows = true,
+      includeAndroid: _includeAndroid = false,  // Moved to PWA generator
+      includeWindows: _includeWindows = false,  // Rarely used, disabled by default
       includeSafari = true
     } = options;
 
@@ -56,15 +57,9 @@ export class FaviconGenerator {
       await this.generateAppleIcons();
     }
 
-    // Generate Android/PWA icons
-    if (includeAndroid) {
-      await this.generateAndroidIcons();
-    }
+    // Note: Android icons moved to PWA generator for better organization
 
-    // Generate Windows tiles
-    if (includeWindows) {
-      await this.generateWindowsTiles();
-    }
+    // Note: Windows tiles generation disabled by default (rarely used in 2024)
 
     // Generate Safari pinned tab
     if (includeSafari) {
@@ -73,45 +68,20 @@ export class FaviconGenerator {
   }
 
   /**
-   * Generate standard PNG favicons in multiple sizes
+   * Generate essential PNG favicon (32x32 only - 2024 best practices)
    */
   private async generatePNGFavicons(): Promise<void> {
-    const promises: Promise<void>[] = [];
-
-    for (const size of ImageSizes.favicon) {
-      const promise = (async () => {
-        const processor = new ImageProcessor(this.sourceImage);
-        const resizedFile = await processor.resize(size, size, { 
-          fit: 'contain', 
-          background: 'transparent',
-          zoom: 1.1 // Add 10% zoom for better visibility
-        });
-        const finalProcessor = new ImageProcessor(resizedFile);
-        const outputPath = path.join(this.config.output.path, `favicon-${size}x${size}.png`);
-        await finalProcessor.save(outputPath);
-        await processor.cleanup();
-        await finalProcessor.cleanup();
-      })();
-      promises.push(promise);
-    }
-
-    // Also generate favicon.png (32x32 default)
-    const defaultPromise = (async () => {
-      const processor = new ImageProcessor(this.sourceImage);
-      const resizedFile = await processor.resize(32, 32, { 
-        fit: 'contain', 
-        background: 'transparent',
-        zoom: 1.1
-      });
-      const finalProcessor = new ImageProcessor(resizedFile);
-      const outputPath = path.join(this.config.output.path, 'favicon.png');
-      await finalProcessor.save(outputPath);
-      await processor.cleanup();
-      await finalProcessor.cleanup();
-    })();
-    promises.push(defaultPromise);
-
-    await Promise.all(promises);
+    // Only generate the essential 32x32 favicon for modern browsers
+    const processor = new ImageProcessor(this.sourceImage);
+    const resizedFile = await processor.resize(32, 32, { 
+      fit: 'contain', 
+      autoDetectBackground: true
+    });
+    const finalProcessor = new ImageProcessor(resizedFile);
+    const outputPath = path.join(this.config.output.path, 'favicon-32x32.png');
+    await finalProcessor.save(outputPath);
+    await processor.cleanup();
+    await finalProcessor.cleanup();
   }
 
   /**
@@ -191,43 +161,17 @@ export class FaviconGenerator {
    * Generate Apple touch icons
    */
   private async generateAppleIcons(): Promise<void> {
-    const promises: Promise<void>[] = [];
-
-    for (const size of ImageSizes.apple) {
-      const promise = (async () => {
-        const processor = new ImageProcessor(this.sourceImage);
-        const resizedFile = await processor.resize(size, size, { 
-          fit: 'contain', 
-          background: this.config.backgroundColor,
-          zoom: 1.1
-        });
-        const finalProcessor = new ImageProcessor(resizedFile);
-        const outputPath = path.join(this.config.output.path, `apple-touch-icon-${size}x${size}.png`);
-        await finalProcessor.save(outputPath);
-        await processor.cleanup();
-        await finalProcessor.cleanup();
-      })();
-      promises.push(promise);
-    }
-
-    // Standard apple-touch-icon.png (180x180)
-    const defaultPromise = (async () => {
-      const processor = new ImageProcessor(this.sourceImage);
-      const resizedFile = await processor.resize(180, 180, { 
-        fit: 'contain', 
-        background: this.config.backgroundColor,
-        zoom: 1.1,
-        autoDetectBackground: true  // Auto-detect background for Apple touch icon
-      });
-      const finalProcessor = new ImageProcessor(resizedFile);
-      const outputPath = path.join(this.config.output.path, 'apple-touch-icon.png');
-      await finalProcessor.save(outputPath);
-      await processor.cleanup();
-      await finalProcessor.cleanup();
-    })();
-    promises.push(defaultPromise);
-
-    await Promise.all(promises);
+    // Only generate the essential 180x180 Apple touch icon (2024 best practices)
+    const processor = new ImageProcessor(this.sourceImage);
+    const resizedFile = await processor.resize(180, 180, { 
+      fit: 'contain', 
+      autoDetectBackground: true
+    });
+    const finalProcessor = new ImageProcessor(resizedFile);
+    const outputPath = path.join(this.config.output.path, 'apple-touch-icon.png');
+    await finalProcessor.save(outputPath);
+    await processor.cleanup();
+    await finalProcessor.cleanup();
   }
 
   /**
@@ -255,9 +199,6 @@ export class FaviconGenerator {
     }
 
     await Promise.all(promises);
-
-    // Generate web app manifest
-    await this.generateManifest();
   }
 
   /**
@@ -343,75 +284,14 @@ fill="#000000" stroke="none">
     await fs.writeFile(outputPath, svgContent);
   }
 
-  /**
-   * Generate manifest.json for PWA support
-   */
-  private async generateManifest(): Promise<void> {
-    const { prefix = '/' } = this.config.output;
-    
-    const manifest = {
-      name: this.config.appName,
-      short_name: this.config.appName,
-      description: this.config.description || '',
-      theme_color: this.config.themeColor,
-      background_color: this.config.backgroundColor,
-      display: 'standalone',
-      orientation: 'portrait-primary',
-      start_url: '/',
-      scope: '/',
-      icons: [
-        {
-          src: `${prefix}android-chrome-192x192.png`,
-          sizes: '192x192',
-          type: 'image/png',
-          purpose: 'any maskable'
-        },
-        {
-          src: `${prefix}android-chrome-512x512.png`,
-          sizes: '512x512',
-          type: 'image/png',
-          purpose: 'any maskable'
-        }
-      ]
-    };
 
-    const outputPath = path.join(this.config.output.path, 'manifest.json');
-    await fs.writeFile(outputPath, JSON.stringify(manifest, null, 2));
-  }
 
   /**
    * Get HTML meta tags for favicons
    */
   getMetaTags(): string[] {
-    const prefix = this.config.output.prefix || '/';
-    return [
-      // Standard favicons
-      `<link rel="icon" type="image/x-icon" href="${prefix}favicon.ico">`,
-      `<link rel="icon" type="image/png" sizes="32x32" href="${prefix}favicon-32x32.png">`,
-      `<link rel="icon" type="image/png" sizes="16x16" href="${prefix}favicon-16x16.png">`,
-      `<link rel="icon" type="image/svg+xml" href="${prefix}favicon.svg">`,
-      
-      // Apple touch icons
-      `<link rel="apple-touch-icon" sizes="180x180" href="${prefix}apple-touch-icon.png">`,
-      
-      // Android/PWA
-      `<link rel="manifest" href="${prefix}manifest.json">`,
-      `<link rel="icon" type="image/png" sizes="192x192" href="${prefix}android-chrome-192x192.png">`,
-      `<link rel="icon" type="image/png" sizes="512x512" href="${prefix}android-chrome-512x512.png">`,
-      
-      // Windows
-      `<meta name="msapplication-config" content="${prefix}browserconfig.xml">`,
-      `<meta name="msapplication-TileColor" content="${this.config.themeColor}">`,
-      
-      // Safari
-      `<link rel="mask-icon" href="${prefix}safari-pinned-tab.svg" color="${this.config.themeColor}">`,
-      
-      // Theme colors
-      `<meta name="theme-color" content="${this.config.themeColor}">`,
-      `<meta name="apple-mobile-web-app-status-bar-style" content="default">`,
-      `<meta name="apple-mobile-web-app-capable" content="yes">`,
-      `<meta name="apple-mobile-web-app-title" content="${this.config.appName}">`,
-    ];
+    const metadataGenerator = new MetadataGenerator(this.config);
+    return metadataGenerator.getFaviconMetaTags();
   }
 
   /**
@@ -449,35 +329,11 @@ fill="#000000" stroke="none">
    */
   getGeneratedFiles(): string[] {
     return [
-      // Standard favicons
-      'favicon.ico',
-      'favicon.png',
-      'favicon.svg',
-      'favicon-16x16.png',
-      'favicon-32x32.png',
-      'favicon-48x48.png',
-      'favicon-64x64.png',
-      'favicon-128x128.png',
-      'favicon-256x256.png',
-      
-      // Apple icons
-      'apple-touch-icon.png',
-      'apple-touch-icon-180x180.png',
-      
-      // Android/PWA
-      'android-chrome-192x192.png',
-      'android-chrome-512x512.png',
-      'manifest.json',
-      
-      // Windows
-      'mstile-70x70.png',
-      'mstile-150x150.png',
-      'mstile-310x150.png',
-      'mstile-310x310.png',
-      'browserconfig.xml',
-      
-      // Safari
-      'safari-pinned-tab.svg',
+      // Essential favicons only (2024 best practices)
+      'favicon.ico',                    // Legacy/IE support
+      'favicon-32x32.png',             // Modern browsers
+      'apple-touch-icon.png',          // iOS home screen (180x180)
+      'safari-pinned-tab.svg',         // Safari pinned tabs
     ];
   }
 } 

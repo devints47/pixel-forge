@@ -1,5 +1,6 @@
 import path from 'path';
 import { ImageProcessor, ImageSizes } from '../../core/image-processor';
+import { MetadataGenerator } from '../../core/metadata-utils';
 import type { PixelForgeConfig } from '../../core/config-validator';
 
 export interface WebSEOOptions {
@@ -186,27 +187,36 @@ export class WebSEOGenerator {
     const { format = 'png' } = options;
     const { prefix = '/' } = this.config.output;
     const extension = format === 'jpeg' ? 'jpg' : 'png';
-
+    
+    const metadataGenerator = new MetadataGenerator(this.config);
+    
+    // Get essential meta tags and web-specific social tags
+    const essentialTags = metadataGenerator.getEssentialMetaTags({
+      title: this.config.appName,
+      description: this.config.description
+    });
+    
+    const socialTags = metadataGenerator.getSocialMetaTags({
+      title: this.config.appName,
+      description: this.config.description,
+      image: `${prefix}og-image.${extension}`
+    });
+    
+    const performanceTags = metadataGenerator.getSecurityPerformanceMetaTags();
+    
     return [
-      // Generic OpenGraph (works for Facebook, LinkedIn, most platforms)
+      ...essentialTags,
+      ...socialTags,
+      ...performanceTags,
+      
+      // Web-specific OpenGraph images  
       `<meta property="og:image" content="${prefix}og-image.${extension}" />`,
       `<meta property="og:image:width" content="${ImageSizes.social.standard.width}" />`,
       `<meta property="og:image:height" content="${ImageSizes.social.standard.height}" />`,
       `<meta property="og:image:type" content="image/${format === 'jpeg' ? 'jpeg' : 'png'}" />`,
-      `<meta property="og:title" content="${this.config.appName}" />`,
-      `<meta property="og:description" content="${this.config.description || ''}" />`,
-      `<meta property="og:type" content="website" />`,
       
-      // Twitter Card
-      `<meta name="twitter:card" content="summary_large_image" />`,
-      `<meta name="twitter:image" content="${prefix}twitter-image.${extension}" />`,
-      `<meta name="twitter:title" content="${this.config.appName}" />`,
-      `<meta name="twitter:description" content="${this.config.description || ''}" />`,
-      
-      // Additional SEO
-      `<meta name="description" content="${this.config.description || ''}" />`,
-      `<meta name="keywords" content="${this.config.appName}" />`,
-      `<meta name="author" content="${this.config.appName}" />`,
+      // Twitter Card specific
+      `<meta name="twitter:image" content="${prefix}twitter-image.${extension}" />`
     ];
   }
 
@@ -259,4 +269,4 @@ export class WebSEOGenerator {
 
     return files;
   }
-} 
+}
