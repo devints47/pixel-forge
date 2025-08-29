@@ -12,6 +12,6 @@ export * from './generators/favicon';
 export * from './api';
 
 /**
- * Default export for convenience
+ * Default export for convenience (now using essential social generation)
  */
-export { ComprehensiveSocialGenerator as default } from './generators/social/comprehensive'; 
+export { BaseOpenGraphGenerator as default } from './generators/social/base-opengraph'; 

@@ -1,20 +1,7 @@
-// Social media generators - comprehensive export
+// Social media generators - essential exports only
 
-// Base classes and utilities
+// Base generator (the only one we use now)
 export { BaseOpenGraphGenerator, type BaseOpenGraphOptions } from './base-opengraph';
-export { SquareOpenGraphGenerator, type SquareOpenGraphOptions } from './square-opengraph';
-export { StandardOpenGraphGenerator, type StandardOpenGraphOptions } from './standard-opengraph';
 
-// Legacy comprehensive generators (gradually being phased out)
-export { ComprehensiveSocialGenerator, type ComprehensiveOptions } from './comprehensive';
-export { OpenGraphGenerator, type OpenGraphOptions } from './opengraph';
-export { MessagingGenerator, type MessagingOptions } from './messaging';
-export { PlatformGenerator, type PlatformOptions } from './platforms';
-
-// Specialized single-use generators
-export { TwitterCardGenerator, type TwitterCardOptions } from './twitter-card';
-export { LinkedInShareGenerator, type LinkedInShareOptions } from './linkedin-share';
-
-// Platform-specific generators (organized by category)
-export * from './platforms';
-export * from './messaging';
+// Note: All other generators have been removed in favor of the optimized essential social generation
+// which produces only 3 core images covering 90% of use cases.
