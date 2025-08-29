@@ -27,63 +27,44 @@ export class ProgressTracker {
   ];
 
   /**
-   * Estimate total files based on generation options
+   * Estimate total files based on generation options (2024 optimized counts)
    */
   static estimateFileCount(options: GenerateOptions): number {
     let totalFiles = 0;
 
-    // Favicon generation (various sizes and formats)
+    // Favicon generation (essential files only)
     if (options.favicon) {
-      totalFiles += 20; // ~20 favicon files (16x16, 32x32, etc., ico, png, svg)
+      totalFiles += 5; // favicon.ico, favicon-32x32.png, favicon.svg, apple-touch-icon.png, safari-pinned-tab.svg
     }
 
-    // PWA generation (icons + splash screens + manifest)
+    // PWA generation (essential files only)
     if (options.pwa) {
-      totalFiles += 39; // ~39 PWA files (icons + splash screens + manifest)
+      totalFiles += 7; // pwa icons (4) + splash screens (2) + manifest.json (1)
     }
 
-    // Social media generation
-    if (options.social || options.platforms || options.messaging) {
-      // Base social media general file
-      totalFiles += 1;
-      
-      // Platform-specific files (if individual platforms specified)
-      const platformCount = [
-        options.facebook, options.twitter, options.linkedin, options.instagram,
-        options.tiktok, options.snapchat, options.threads, options.whatsapp,
-        options.youtube, options.pinterest, options.bluesky, options.mastodon
-      ].filter(Boolean).length;
-      
-      // Most platforms generate 1-2 files, some like YouTube/Pinterest generate more
-      totalFiles += platformCount * 2;
-      
-      // Messaging platforms (usually 1 file each)
-      const messagingCount = [
-        options.discord, options.telegram, options.signal, options.slack,
-        options.imessage, options.androidrcs
-      ].filter(Boolean).length;
-      
-      totalFiles += messagingCount;
-      
-      // If using comprehensive social (--social), estimate based on all platforms
-      if (options.social && !platformCount && !messagingCount) {
-        totalFiles += 12; // Comprehensive social generates ~13 files
-      }
+    // Social media generation (optimized essential files only)
+    if (options.social) {
+      totalFiles += 3; // social-media-general.png, instagram-square.png, social-vertical.png
     }
 
     // SEO/Web generation
     if (options.seo || options.web) {
-      totalFiles += 3; // OpenGraph images and meta files
+      totalFiles += 3; // og-image.png, opengraph.png, twitter-image.png
     }
 
-    // If --all flag, include everything
+    // If --all flag, include everything (optimized count)
     if (options.all) {
-      totalFiles = 75; // Comprehensive estimate for all assets
+      totalFiles = 19; // 5 favicon + 7 PWA + 3 social + 3 SEO + 1 meta-tags.html = 19 files
     }
 
     // If no specific options, default to social
     if (totalFiles === 0) {
-      totalFiles = 13; // Default social generation
+      totalFiles = 3; // Default social generation (3 essential images)
+    }
+
+    // Always add 1 for meta-tags.html (automatically generated)
+    if (!options.all) {
+      totalFiles += 1;
     }
 
     return Math.max(totalFiles, 1); // Ensure at least 1 for progress bar

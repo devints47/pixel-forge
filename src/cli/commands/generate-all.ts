@@ -5,6 +5,7 @@ import { PWAGenerator } from '../../generators/pwa';
 import { WebSEOGenerator } from '../../generators/web';
 import type { PixelForgeConfig } from '../../core/config-validator';
 import { getProgressTracker, resetProgressTracker } from '../utils/progress-tracker';
+import { SmartMetadataGenerator } from '../../core/smart-metadata-generator';
 
 export interface GenerateAllOptions {
   format?: 'png' | 'jpeg' | 'both';
@@ -60,14 +61,24 @@ export async function generateAll(
       file.endsWith('.xml')
     );
 
-    // Complete progress tracking
-    await progressTracker.complete(assetFiles.length);
+    // Always generate meta tags for all generated files
+    const metadataGenerator = new SmartMetadataGenerator(config, {
+      generatedFiles: assetFiles,
+      outputDir: config.output.path,
+      urlPrefix: config.output.prefix || '/images/'
+    });
 
-    console.log(`✅ Generated ${assetFiles.length} files in ${config.output.path}`);
+    await metadataGenerator.saveToFile(config.output.path);
+
+    // Complete progress tracking (include meta-tags.html in count)
+    await progressTracker.complete(assetFiles.length + 1);
+
+    console.log(`✅ Generated ${assetFiles.length + 1} files in ${config.output.path}`);
     
     if (options.verbose) {
       console.log('\nGenerated files:');
       assetFiles.forEach(file => console.log(`  📄 ${file}`));
+      console.log('  📄 meta-tags.html');
     }
   } catch (error) {
     progressTracker.stop();
