@@ -58,7 +58,8 @@ export async function generateAll(
       file.endsWith('.svg') ||
       file.endsWith('.ico') ||
       file.endsWith('.json') ||
-      file.endsWith('.xml')
+      file.endsWith('.xml') ||
+      file.endsWith('.html')
     );
 
     // Always generate meta tags for all generated files
@@ -70,10 +71,22 @@ export async function generateAll(
 
     await metadataGenerator.saveToFile(config.output.path);
 
-    // Complete progress tracking (include meta-tags.html in count)
-    await progressTracker.complete(assetFiles.length + 1);
+    // Complete progress tracking (event-driven already counted all)
+    await progressTracker.complete();
+    const { current: actualCreated } = progressTracker.getProgress();
 
-    console.log(`✅ Generated ${assetFiles.length + 1} files in ${config.output.path}`);
+    // Section summaries
+    const imageExts = ['.png', '.jpg', '.jpeg', '.webp', '.svg', '.ico'];
+    const imageCount = assetFiles.filter(f => imageExts.some(ext => f.toLowerCase().endsWith(ext))).length;
+    const nonImage = assetFiles.filter(f => !imageExts.some(ext => f.toLowerCase().endsWith(ext)));
+    console.log(`📂 All Assets: ${imageCount} files`);
+
+    if (nonImage.includes('manifest.json')) {
+      console.log('🧾 Generated manifest.json');
+    }
+    console.log('📝 Created meta-tags.html');
+
+    console.log(`\n✅ Generated ${actualCreated} files in ${config.output.path}`);
     
     if (options.verbose) {
       console.log('\nGenerated files:');

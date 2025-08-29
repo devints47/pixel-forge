@@ -209,5 +209,12 @@ ${metaTags.map(tag => tag.startsWith('<!--') || tag === '' ? tag : `  ${tag}`).j
 
     const filePath = path.join(outputDir, filename);
     await fs.writeFile(filePath, htmlContent, 'utf8');
+    try {
+      // Dynamically import to avoid circular deps in core
+      const { emitProgress } = await import('./progress-events');
+      emitProgress(filePath);
+    } catch {
+      // Best-effort emit
+    }
   }
 }
