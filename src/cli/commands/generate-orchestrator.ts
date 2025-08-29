@@ -4,6 +4,7 @@ import { generateComprehensiveSocial } from './generate-social';
 import type { PixelForgeConfig } from '../../core/config-validator';
 import { getProgressTracker, resetProgressTracker } from '../utils/progress-tracker';
 import { SmartMetadataGenerator } from '../../core/smart-metadata-generator';
+import { makeBackgroundTransparent } from '../../core/transparent-background';
 
 export interface GenerateOptions {
   all?: boolean;
@@ -12,6 +13,7 @@ export interface GenerateOptions {
   pwa?: boolean;
   seo?: boolean;
   web?: boolean;
+  transparent?: boolean;
   format?: 'png' | 'jpeg' | 'both';
   verbose?: boolean;
 }
@@ -83,6 +85,14 @@ export async function generateAssets(
         verbose: options.verbose
       });
       results.push(seoResult);
+    }
+
+    // Handle --transparent (single image output with transparent background)
+    if (options.transparent) {
+      const outName = 'transparent.png';
+      const outPath = `${config.output.path}/${outName}`;
+      await makeBackgroundTransparent(sourceImage, outPath);
+      results.push({ name: 'Transparent Background', files: [outName] });
     }
 
     // If no specific options provided, default to social

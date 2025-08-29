@@ -42,6 +42,7 @@ program
   .option('--pwa', 'Generate PWA assets only')
   .option('--seo', 'Generate SEO/OpenGraph assets only')
   .option('--web', 'Generate complete web development package (favicon + PWA + SEO)')
+  .option('-t, --transparent', 'Create a single image with background made transparent')
   .option('-v, --verbose', 'Verbose output')
   .action(async (source: string, options: CLIOptions) => {
     try {

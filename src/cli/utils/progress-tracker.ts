@@ -52,6 +52,11 @@ export class ProgressTracker {
       totalFiles += 3; // og-image.png, opengraph.png, twitter-image.png
     }
 
+    // Transparent background generation (single output)
+    if ((options as any).transparent) {
+      totalFiles += 1; // one transparent image
+    }
+
     // If --all flag, include everything (optimized count)
     if (options.all) {
       totalFiles = 20; // 6 favicon + 7 PWA + 3 social + 3 SEO + 1 meta-tags.html = 20 files
