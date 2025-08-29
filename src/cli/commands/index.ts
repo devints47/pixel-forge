@@ -1,6 +1,5 @@
 // Command modules
 export { generateAssets, type GenerateOptions } from './generate-orchestrator';
-export { generateMetaTags } from './meta-tags';
 export { initProject } from './init-project';
 
 // Utility modules

@@ -48,7 +48,7 @@ export async function loadConfig(
     },
 
     output: {
-      path: options.output || config.output?.path || './public/images',
+      path: options.output || config.output?.path || './generated',
       prefix: options.prefix || config.output?.prefix || '/images/',
       quality: parseInt(options.quality || '90') || config.output?.quality || 90
     }

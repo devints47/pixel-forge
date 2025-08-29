@@ -5,7 +5,6 @@ import path from 'path';
 import { promises as fs } from 'fs';
 import {
   generateAssets,
-  generateMetaTags,
   initProject,
   loadConfig,
   checkImageMagickAvailability,
@@ -32,33 +31,13 @@ program
 program
   .command('generate <source>')
   .description('Generate images from source file (supports PNG, JPEG, WebP, AVIF, TIFF, GIF, SVG, BMP)')
-  .option('-o, --output <path>', 'Output directory', './public/images')
+  .option('-o, --output <path>', 'Output directory', './generated')
   .option('-c, --config <path>', 'Config file path')
   .option('-q, --quality <number>', 'Image quality (1-100)', '90')
   .option('-p, --prefix <path>', 'URL prefix for generated files', '/images/')
   .option('-f, --format <format>', 'Output format (png|jpeg|webp|avif|tiff|gif)', 'png')
   .option('--all', 'Generate all asset types')
-  .option('--social', 'Generate comprehensive social media assets for ALL supported platforms (includes general OpenGraph image plus platform-specific images)')
-  .option('--facebook', 'Generate Facebook assets only')
-  .option('--twitter', 'Generate Twitter assets only')
-  .option('--linkedin', 'Generate LinkedIn assets only')
-  .option('--instagram', 'Generate Instagram assets only')
-  .option('--tiktok', 'Generate TikTok assets only')
-  .option('--whatsapp', 'Generate WhatsApp assets only')
-  .option('--youtube', 'Generate YouTube assets only')
-  .option('--pinterest', 'Generate Pinterest assets only')
-  .option('--imessage', 'Generate iMessage assets only')
-  .option('--discord', 'Generate Discord assets only')
-  .option('--telegram', 'Generate Telegram assets only')
-  .option('--signal', 'Generate Signal assets only')
-  .option('--slack', 'Generate Slack assets only')
-  .option('--androidrcs', 'Generate Android RCS assets only')
-  .option('--snapchat', 'Generate Snapchat assets only')
-  .option('--threads', 'Generate Threads assets only')
-  .option('--bluesky', 'Generate Bluesky assets only')
-  .option('--mastodon', 'Generate Mastodon assets only')
-  .option('--messaging', 'Generate messaging app assets')
-  .option('--platforms', 'Generate video/visual platform assets')
+  .option('--social', 'Generate essential social media assets (3 core images)')
   .option('--favicon', 'Generate favicon assets only')
   .option('--pwa', 'Generate PWA assets only')
   .option('--seo', 'Generate SEO/OpenGraph assets only')
@@ -94,25 +73,7 @@ program
     }
   });
 
-// Meta tags command
-program
-  .command('meta <source>')
-  .description('Generate HTML meta tags for the assets')
-  .option('-c, --config <path>', 'Config file path')
-  .option('-p, --prefix <path>', 'URL prefix for generated files', '/images/')
-  .action(async (source: string, options: CLIOptions) => {
-    try {
-      const sourcePath = path.resolve(source);
-      await fs.access(sourcePath);
-
-      const config = await loadConfig(options.config, options);
-      await generateMetaTags(sourcePath, config);
-
-    } catch (error) {
-      console.error('❌ Error:', error instanceof Error ? error.message : error);
-      process.exit(1);
-    }
-  });
+// Note: Meta tags are now always generated automatically with all generate commands
 
 // Init command
 program
