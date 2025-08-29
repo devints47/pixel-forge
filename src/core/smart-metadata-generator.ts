@@ -80,15 +80,23 @@ export class SmartMetadataGenerator {
   private getFaviconMetaTags(): string[] {
     const tags: string[] = [];
 
-    if (this.hasFile('favicon.ico') || this.hasFile('favicon-32x32.png') || this.hasFile('favicon.svg') || this.hasFile('apple-touch-icon.png') || this.hasFile('safari-pinned-tab.svg')) {
+    if (this.hasFile('favicon.ico') || this.hasFile('favicon-16x16.png') || this.hasFile('favicon-32x32.png') || this.hasFile('favicon-48x48.png') || this.hasFile('favicon.svg') || this.hasFile('apple-touch-icon.png') || this.hasFile('safari-pinned-tab.svg')) {
       tags.push('<!-- Favicon Meta Tags -->');
 
       if (this.hasFile('favicon.ico')) {
         tags.push(`<link rel="icon" type="image/x-icon" href="${this.urlPrefix}favicon.ico">`);
       }
 
+      if (this.hasFile('favicon-16x16.png')) {
+        tags.push(`<link rel="icon" type="image/png" sizes="16x16" href="${this.urlPrefix}favicon-16x16.png">`);
+      }
+
       if (this.hasFile('favicon-32x32.png')) {
         tags.push(`<link rel="icon" type="image/png" sizes="32x32" href="${this.urlPrefix}favicon-32x32.png">`);
+      }
+
+      if (this.hasFile('favicon-48x48.png')) {
+        tags.push(`<link rel="icon" type="image/png" sizes="48x48" href="${this.urlPrefix}favicon-48x48.png">`);
       }
 
       if (this.hasFile('favicon.svg')) {

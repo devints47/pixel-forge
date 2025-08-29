@@ -1,4 +1,4 @@
-# Pixel Forge 🎨
+# Pixel Forge
 
 <div align="center">
   <img width="225" height="225" alt="Pixel Forge Logo Transparent" src="https://github.com/user-attachments/assets/19e54310-ce12-4dd1-9db5-46c11319e8a9" />
@@ -12,7 +12,7 @@
   [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 </div>
 
-**Pixel Forge** generates **only the essential assets** your website needs for modern web sharing. Optimized for 2024 SEO best practices - no bloat, no over-generation.
+**Pixel Forge** generates **only the essential assets** your website needs for modern web sharing. Optimized for 2025 SEO best practices - no bloat, no over-generation.
 
 ✨ **Auto-detects background colors** for perfect image extension  
 🚀 **Zero configuration** - just provide your logo  
@@ -43,9 +43,9 @@ choco install imagemagick
 npx pixel-forge generate logo.png --all
 ```
 
-This creates **19 essential assets** in the `./generated` folder:
+This creates **20 essential assets** in the `./generated` folder:
 - 🌍 **Social media images** (3 essential formats: landscape, square, vertical)
-- 🏠 **Favicons** (5 essential files: ICO, PNG, SVG, Apple Touch, Safari)
+- 🏠 **Favicons** (6 essential files: ICO, multiple PNG sizes, SVG, Apple Touch, Safari)
 - 📱 **PWA assets** (7 essential files: manifest + core icons)
 - 🔍 **SEO assets** for complete web coverage
 
@@ -60,10 +60,12 @@ npx pixel-forge generate logo.png --favicon
 
 ## 📂 What Gets Generated
 
-### `--favicon` (5 essential files)
+### `--favicon` (6 essential files)
 ```
-favicon.ico              # Legacy browser support
-favicon-32x32.png        # Modern browsers
+favicon.ico              # Legacy browsers, IE (contains 16x16 + 32x32)
+favicon-16x16.png        # Browser tab, small displays
+favicon-32x32.png        # Browser tab, standard displays
+favicon-48x48.png        # Desktop shortcuts, Windows taskbar
 favicon.svg              # Scalable vector icon
 apple-touch-icon.png     # iOS home screen (180x180)
 safari-pinned-tab.svg    # Safari pinned tabs
@@ -167,9 +169,9 @@ npx pixel-forge generate <image> [options]
 pf generate <image> [options]  # Short alias
 
 # Asset type flags
---all           # Generate all essential assets (19 files including meta-tags.html)
+--all           # Generate all essential assets (20 files including meta-tags.html)
 --social        # Generate essential social media assets (3 core images + meta-tags.html)
---favicon       # Generate favicon assets (5 files + meta-tags.html)
+--favicon       # Generate favicon assets (6 files + meta-tags.html)
 --pwa          # Generate PWA assets (7 files + meta-tags.html) 
 --seo          # Generate SEO/social images (3-6 files + meta-tags.html)
 --web          # Generate web package (favicon + PWA + SEO + meta-tags.html)

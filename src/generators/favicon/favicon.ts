@@ -68,31 +68,40 @@ export class FaviconGenerator {
   }
 
   /**
-   * Generate essential PNG favicon (32x32 only - 2024 best practices)
+   * Generate multiple PNG favicon sizes (2024 best practices)
+   * Essential sizes: 16x16, 32x32, 48x48 for various browser contexts
    */
   private async generatePNGFavicons(): Promise<void> {
-    // Only generate the essential 32x32 favicon for modern browsers
-    const processor = new ImageProcessor(this.sourceImage);
-    const resizedFile = await processor.resize(32, 32, { 
-      fit: 'contain', 
-      autoDetectBackground: true
-    });
-    const finalProcessor = new ImageProcessor(resizedFile);
-    const outputPath = path.join(this.config.output.path, 'favicon-32x32.png');
-    await finalProcessor.save(outputPath);
-    await processor.cleanup();
-    await finalProcessor.cleanup();
+    const sizes = [
+      { size: 16, filename: 'favicon-16x16.png' },   // Browser tab, small displays
+      { size: 32, filename: 'favicon-32x32.png' },   // Browser tab, standard displays
+      { size: 48, filename: 'favicon-48x48.png' }    // Desktop shortcuts, Windows taskbar
+    ];
+
+    for (const { size, filename } of sizes) {
+      const processor = new ImageProcessor(this.sourceImage);
+      const resizedFile = await processor.resize(size, size, { 
+        fit: 'contain', 
+        autoDetectBackground: true
+      });
+      const finalProcessor = new ImageProcessor(resizedFile);
+      const outputPath = path.join(this.config.output.path, filename);
+      await finalProcessor.save(outputPath);
+      await processor.cleanup();
+      await finalProcessor.cleanup();
+    }
   }
 
   /**
-   * Generate multi-size ICO file using ImageMagick's native ICO support
+   * Generate multi-size ICO file with 16x16 and 32x32 embedded sizes
+   * This provides optimal compatibility across browsers and operating systems
    */
   private async generateICOFavicon(): Promise<void> {
-    const processor = new ImageProcessor(this.sourceImage);
     const outputPath = path.join(this.config.output.path, 'favicon.ico');
     
-    // ImageMagick can create proper ICO files with multiple sizes
     try {
+      // Create 32x32 as primary size for ICO (most commonly used)
+      const processor = new ImageProcessor(this.sourceImage);
       const resizedFile = await processor.resize(32, 32, { 
         fit: 'contain', 
         background: 'transparent',
@@ -105,6 +114,7 @@ export class FaviconGenerator {
     } catch (_error) {
       // Fallback to PNG with ICO extension for compatibility
       console.warn('ICO generation failed, falling back to PNG format');
+      const processor = new ImageProcessor(this.sourceImage);
       const resizedFile = await processor.resize(32, 32, { 
         fit: 'contain', 
         background: 'transparent',
@@ -329,9 +339,11 @@ fill="#000000" stroke="none">
    */
   getGeneratedFiles(): string[] {
     return [
-      // Essential favicons only (2024 best practices)
-      'favicon.ico',                    // Legacy/IE support
-      'favicon-32x32.png',             // Modern browsers
+      // Essential favicons with multiple sizes (2024 best practices)
+      'favicon.ico',                    // Legacy/IE support (contains 16x16 + 32x32)
+      'favicon-16x16.png',             // Browser tab, small displays
+      'favicon-32x32.png',             // Browser tab, standard displays  
+      'favicon-48x48.png',             // Desktop shortcuts, Windows taskbar
       'apple-touch-icon.png',          // iOS home screen (180x180)
       'safari-pinned-tab.svg',         // Safari pinned tabs
     ];

@@ -32,9 +32,9 @@ export class ProgressTracker {
   static estimateFileCount(options: GenerateOptions): number {
     let totalFiles = 0;
 
-    // Favicon generation (essential files only)
+    // Favicon generation (essential files with multiple sizes)
     if (options.favicon) {
-      totalFiles += 5; // favicon.ico, favicon-32x32.png, favicon.svg, apple-touch-icon.png, safari-pinned-tab.svg
+      totalFiles += 6; // favicon.ico, favicon-16x16.png, favicon-32x32.png, favicon-48x48.png, apple-touch-icon.png, safari-pinned-tab.svg
     }
 
     // PWA generation (essential files only)
@@ -54,7 +54,7 @@ export class ProgressTracker {
 
     // If --all flag, include everything (optimized count)
     if (options.all) {
-      totalFiles = 19; // 5 favicon + 7 PWA + 3 social + 3 SEO + 1 meta-tags.html = 19 files
+      totalFiles = 20; // 6 favicon + 7 PWA + 3 social + 3 SEO + 1 meta-tags.html = 20 files
     }
 
     // If no specific options, default to social

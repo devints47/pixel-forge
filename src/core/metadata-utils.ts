@@ -56,9 +56,11 @@ export class MetadataGenerator {
     const { includeSafari = true } = options;
     
     const tags = [
-      '<!-- Essential Favicon Meta Tags (2024 Best Practices) -->',
+      '<!-- Essential Favicon Meta Tags (2024 Best Practices with Multiple Sizes) -->',
       `<link rel="icon" type="image/x-icon" href="${this.prefix}favicon.ico">`,
+      `<link rel="icon" type="image/png" sizes="16x16" href="${this.prefix}favicon-16x16.png">`,
       `<link rel="icon" type="image/png" sizes="32x32" href="${this.prefix}favicon-32x32.png">`,
+      `<link rel="icon" type="image/png" sizes="48x48" href="${this.prefix}favicon-48x48.png">`,
       `<link rel="icon" type="image/svg+xml" href="${this.prefix}favicon.svg">`,
       
       '<!-- Apple Touch Icon (Essential Only) -->',
