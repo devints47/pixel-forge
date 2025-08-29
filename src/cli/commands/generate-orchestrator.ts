@@ -91,10 +91,6 @@ export async function generateAssets(
       results.push(...socialResults);
     }
 
-    // Complete progress tracking
-    const totalFiles = results.reduce((sum, { files }) => sum + files.length, 0);
-    await progressTracker.complete(totalFiles);
-
     // Always generate meta tags for generated files
     const allGeneratedFiles = results.flatMap(({ files }) => files);
     const metadataGenerator = new SmartMetadataGenerator(config, {
@@ -104,6 +100,10 @@ export async function generateAssets(
     });
 
     await metadataGenerator.saveToFile(config.output.path);
+
+    // Complete progress tracking (include meta-tags.html in count)
+    const totalFiles = results.reduce((sum, { files }) => sum + files.length, 0);
+    await progressTracker.complete(totalFiles + 1); // +1 for meta-tags.html
 
     // Display summary
     console.log('✅ Generation complete!\n');
@@ -117,7 +117,7 @@ export async function generateAssets(
       }
     });
 
-    console.log(`\n🎉 Total: ${totalFiles} files generated in ${config.output.path}`);
+    console.log(`\n🎉 Total: ${totalFiles + 1} files generated in ${config.output.path}`);
   } catch (error) {
     progressTracker.stop();
     throw error;
