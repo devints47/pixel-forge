@@ -2,6 +2,7 @@ import { execFile } from 'child_process';
 import { promisify } from 'util';
 import path from 'path';
 import { promises as fs } from 'fs';
+import { emitProgress } from './progress-events';
 // Minimal Jimp typing to avoid unsafe any while supporting ESM dynamic import
 type JimpImage = {
   bitmap: { width: number; height: number; data: Buffer };
@@ -494,6 +495,7 @@ export class ImageProcessor {
       }
       await fs.mkdir(path.dirname(outputPath), { recursive: true });
       await img.writeAsync(outputPath);
+      emitProgress(outputPath);
       return;
     }
     
@@ -565,6 +567,7 @@ export class ImageProcessor {
       const errorMessage = error instanceof Error ? error.message : String(error);
       throw new Error(`ImageMagick save failed: ${errorMessage}`);
     }
+    emitProgress(outputPath);
   }
 
   /**
