@@ -2,7 +2,7 @@ import * as cliProgress from 'cli-progress';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { setProgressRecorder } from '../../core/progress-events';
-import { GenerateOptions } from '../commands/generate-orchestrator';
+import type { GenerateOptions } from '../commands/generate-orchestrator';
 
 export interface ProgressConfig {
   total: number;
@@ -29,6 +29,14 @@ export class ProgressTracker {
     '.png', '.jpg', '.jpeg', '.webp', '.svg', '.ico',
     '.json', '.xml', '.html'
   ];
+
+  // Type-safe check for optional transparent flag on options
+  private static hasTransparentFlag(o: unknown): boolean {
+    if (!o || typeof o !== "object") return false;
+    const rec = o as Record<string, unknown>;
+    const t = rec.transparent;
+    return typeof t === "boolean" && t;
+  }
 
   /**
    * Estimate total files based on generation options (2024 optimized counts)
@@ -63,7 +71,7 @@ export class ProgressTracker {
 
     // Transparent background generation (single output when used alone)
     const hasOtherGenerators = !!(options.all || options.web || options.favicon || options.pwa || options.seo || options.social);
-    if ((options as any).transparent && !hasOtherGenerators) {
+    if (ProgressTracker.hasTransparentFlag(options) && !hasOtherGenerators) {
       totalFiles += 1; // one transparent image
     }
 
@@ -94,7 +102,7 @@ export class ProgressTracker {
       return files.filter(file => 
         this.assetExtensions.some(ext => file.toLowerCase().endsWith(ext))
       ).length;
-    } catch (error) {
+    } catch (_error) {
       // Directory might not exist yet
       return 0;
     }
@@ -108,19 +116,21 @@ export class ProgressTracker {
     
     this.isPolling = true;
     
-    this.pollingInterval = setInterval(async () => {
-      try {
-        const currentFileCount = await this.countAssetFiles(this.outputDirectory);
-        const newFiles = currentFileCount - this.initialFileCount;
-        
-        // Update progress based on actual file count
-        if (newFiles !== this.currentProgress) {
-          this.currentProgress = Math.min(newFiles, this.totalFiles);
-          this.bar?.update(this.currentProgress);
+    this.pollingInterval = setInterval(() => {
+      void (async () => {
+        try {
+          const currentFileCount = await this.countAssetFiles(this.outputDirectory);
+          const newFiles = currentFileCount - this.initialFileCount;
+
+          // Update progress based on actual file count
+          if (newFiles !== this.currentProgress) {
+            this.currentProgress = Math.min(newFiles, this.totalFiles);
+            this.bar?.update(this.currentProgress);
+          }
+        } catch (_error) {
+          // Ignore polling errors to prevent breaking the main functionality
         }
-      } catch (error) {
-        // Ignore polling errors to prevent breaking the main functionality
-      }
+      })();
     }, 150); // Poll every 150ms for smooth updates
   }
 
@@ -226,15 +236,15 @@ export class ProgressTracker {
   }
 
   // Deprecated methods - kept for compatibility but no longer needed
-  increment(amount: number = 1): void {
+  increment(_amount: number = 1): void {
     // No-op - progress is now tracked by file polling
   }
 
-  update(value: number): void {
+  update(_value: number): void {
     // No-op - progress is now tracked by file polling
   }
 
-  addFiles(fileCount: number): void {
+  addFiles(_fileCount: number): void {
     // No-op - progress is now tracked by file polling
   }
 
