@@ -718,9 +718,11 @@ export class ImageProcessor {
       'info:'
     ]);
     
-    const [wStr, hStr] = sizeOut.trim().split(/\s+/);
-    const width = parseInt(wStr, 10);
-    const height = parseInt(hStr, 10);
+    const sizeParts = sizeOut.toString().trim().split(/\s+/);
+    const wStr = sizeParts[0] ?? "0";
+    const hStr = sizeParts[1] ?? "0";
+    const width = Number.parseInt(wStr, 10);
+    const height = Number.parseInt(hStr, 10);
 
     // 2) Get raw RGBA for the resized image
     const { stdout } = await execFileAsync(magickCmd, [
@@ -802,11 +804,16 @@ export class ImageProcessor {
         if (!onBorder) continue;
         
         const idx = (y * width + x) * c;
-        const r = data[idx];
-        const g = data[idx + 1];
-        const b = data[idx + 2];
-        const a = data[idx + 3];
-        
+        // Guard against out-of-bounds access when sampling edge pixels
+        if (idx + 3 >= data.length) {
+          continue;
+        }
+        // Provide safe defaults to satisfy noUncheckedIndexedAccess
+        const r = data[idx] ?? 0;
+        const g = data[idx + 1] ?? 0;
+        const b = data[idx + 2] ?? 0;
+        const a = data[idx + 3] ?? 0;
+
         totalBorder++;
         if (a < alphaThreshold) {
           transparentCount++;
