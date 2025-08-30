@@ -110,12 +110,13 @@ export class ProgressTracker {
 
   /**
    * Start polling the directory for file changes
+   * Note: not async by design; the interval body handles awaits.
    */
-  private async startPolling(): Promise<void> {
+  private startPolling(): void {
     if (this.isPolling || !this.outputDirectory || !this.bar) return;
-    
+
     this.isPolling = true;
-    
+
     this.pollingInterval = setInterval(() => {
       void (async () => {
         try {
@@ -190,7 +191,7 @@ export class ProgressTracker {
     
     // If events aren't available for some reason, fallback to polling
     if (!this.usingEvents) {
-      await this.startPolling();
+      this.startPolling();
     }
   }
 
