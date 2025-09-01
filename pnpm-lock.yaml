@@ -36,6 +36,9 @@ importers:
       '@types/node':
         specifier: ^22.16.5
         version: 22.16.5
+      conventional-changelog-angular:
+        specifier: ^8.0.0
+        version: 8.0.0
       conventional-changelog-cli:
         specifier: ^5.0.0
         version: 5.0.0(conventional-commits-filter@5.0.0)
