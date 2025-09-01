@@ -1,6 +1,6 @@
 import path from 'path';
 import { ImageProcessor, ImageSizes } from '../../core/image-processor';
-import { MetadataGenerator } from '../../core/metadata-utils';
+import { SmartMetadataGenerator } from '../../core/smart-metadata-generator';
 import type { PixelForgeConfig } from '../../core/config-validator';
 
 export interface WebSEOOptions {
@@ -188,28 +188,17 @@ export class WebSEOGenerator {
     const { prefix = '/' } = this.config.output;
     const extension = format === 'jpeg' ? 'jpg' : 'png';
     
-    const metadataGenerator = new MetadataGenerator(this.config);
-    
-    // Get essential meta tags and web-specific social tags
-    const essentialTags = metadataGenerator.getEssentialMetaTags({
-      title: this.config.appName,
-      description: this.config.description
+    const metadataGenerator = new SmartMetadataGenerator(this.config, {
+      generatedFiles: this.getGeneratedFiles(),
+      outputDir: this.config.output.path,
+      urlPrefix: prefix
     });
     
-    const socialTags = metadataGenerator.getSocialMetaTags({
-      title: this.config.appName,
-      description: this.config.description,
-      image: `${prefix}og-image.${extension}`
-    });
+    // Get all meta tags from the smart metadata generator
+    const allTags = metadataGenerator.generateMetaTags();
     
-    const performanceTags = metadataGenerator.getSecurityPerformanceMetaTags();
-    
-    return [
-      ...essentialTags,
-      ...socialTags,
-      ...performanceTags,
-      
-      // Web-specific OpenGraph images  
+    // Add web-specific OpenGraph images  
+    allTags.push(
       `<meta property="og:image" content="${prefix}og-image.${extension}" />`,
       `<meta property="og:image:width" content="${ImageSizes.social.standard.width}" />`,
       `<meta property="og:image:height" content="${ImageSizes.social.standard.height}" />`,
@@ -217,7 +206,9 @@ export class WebSEOGenerator {
       
       // Twitter Card specific
       `<meta name="twitter:image" content="${prefix}twitter-image.${extension}" />`
-    ];
+    );
+    
+    return allTags;
   }
 
   /**

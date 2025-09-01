@@ -1,7 +1,7 @@
 import path from 'path';
 import { promises as fs } from 'fs';
 import { ImageProcessor } from '../../core/image-processor';
-import { MetadataGenerator } from '../../core/metadata-utils';
+import { SmartMetadataGenerator } from '../../core/smart-metadata-generator';
 import type { PixelForgeConfig } from '../../core/config-validator';
 
 export interface PWAOptions {
@@ -347,11 +347,12 @@ export class PWAGenerator {
    * Get HTML meta tags for PWA
    */
   getMetaTags(): string[] {
-    const metadataGenerator = new MetadataGenerator(this.config);
-    return metadataGenerator.getPWAMetaTags({
-      title: this.config.appName,
-      description: this.config.description
+    const metadataGenerator = new SmartMetadataGenerator(this.config, {
+      generatedFiles: this.getGeneratedFiles(),
+      outputDir: this.config.output.path,
+      urlPrefix: this.config.output.prefix || '/'
     });
+    return metadataGenerator.generateMetaTags();
   }
 
   /**

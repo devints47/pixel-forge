@@ -1,7 +1,4 @@
-// Social media generators - essential exports only
+// Social media generators - comprehensive export
 
-// Base generator (the only one we use now)
+// Base classes and utilities
 export { BaseOpenGraphGenerator, type BaseOpenGraphOptions } from './base-opengraph';
-
-// Note: All other generators have been removed in favor of the optimized essential social generation
-// which produces only 3 core images covering 90% of use cases.
