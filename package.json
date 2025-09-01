@@ -1,6 +1,6 @@
 {
   "name": "pixel-forge",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "A comprehensive generator for favicons, opengraph previews and visual assets across all platforms",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -66,6 +66,7 @@
     "@types/cli-progress": "^3.11.6",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.16.5",
+    "conventional-changelog-angular": "^8.0.0",
     "conventional-changelog-cli": "^5.0.0",
     "eslint": "^9.33.0",
     "eslint-plugin-promise": "^7.2.1",
