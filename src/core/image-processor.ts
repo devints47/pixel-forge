@@ -142,6 +142,12 @@ export class ImageProcessor {
     }
     
     try {
+      // Prefer explicit path if provided
+      const explicitMagick = process.env.MAGICK_PATH;
+      if (explicitMagick) {
+        await execFileAsync(explicitMagick, ['-version']);
+        return true;
+      }
       await execFileAsync('magick', ['-version']);
       return true;
     } catch (_error) {
@@ -150,7 +156,17 @@ export class ImageProcessor {
         await execFileAsync('convert', ['-version']);
         return true;
       } catch (_fallbackError) {
-        return false;
+        // Try executing from known bundled location
+        const baseDir = process.env.MAGICK_DEFAULT_DIR || '/var/task/bin/imagemagick';
+        const candidate = path.join(baseDir, 'bin', 'magick');
+        try {
+          await execFileAsync(candidate, ['-version']);
+          // Cache explicit path for subsequent calls
+          process.env.MAGICK_PATH = candidate;
+          return true;
+        } catch {
+          return false;
+        }
       }
     }
   }
@@ -164,11 +180,25 @@ export class ImageProcessor {
     }
     
     try {
+      // Use explicit path first if set
+      const explicitMagick = process.env.MAGICK_PATH;
+      if (explicitMagick) {
+        await execFileAsync(explicitMagick, ['-version']);
+        return explicitMagick;
+      }
       await execFileAsync('magick', ['-version']);
       return 'magick';
     } catch (_error) {
-      // Fallback to legacy 'convert' command
-      return 'convert';
+      // Try bundled location
+      const baseDir = process.env.MAGICK_DEFAULT_DIR || '/var/task/bin/imagemagick';
+      const candidate = path.join(baseDir, 'bin', 'magick');
+      try {
+        await execFileAsync(candidate, ['-version']);
+        return candidate;
+      } catch {
+        // Fallback to legacy 'convert' command
+        return 'convert';
+      }
     }
   }
 
