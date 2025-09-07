@@ -205,10 +205,3 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 ## 📄 License
 
 MIT License - see [LICENSE](LICENSE) for details.
-
----
-
-<div align="center">
-  <strong>Built with ❤️ for modern web development</strong><br>
-  <em>Stop generating bloat. Start generating essentials.</em>
-</div>
